@@ -1,5 +1,7 @@
 {
   "name": "controUpApp",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }

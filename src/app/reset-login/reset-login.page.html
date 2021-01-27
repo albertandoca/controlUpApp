@@ -1,0 +1,28 @@
+<ion-header >
+  <ion-toolbar class="background-header">
+    <ion-title>Cambiar contraseña</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="background-image">
+  <div class="contenedor1">
+    <ion-item class="background-item"> 
+      <ion-label class= "rojo" position="floating">Contraseña actual</ion-label>
+      <ion-input type="password"></ion-input>
+    </ion-item>
+    <ion-item class="background-item"> 
+      <ion-label class= "rojo" position="floating">Nueva contraseña</ion-label>
+      <ion-input type="password"></ion-input>
+    </ion-item>
+    <ion-item class="background-item"> 
+      <ion-label class= "rojo" position="floating">Repetir contraseña</ion-label>
+      <ion-input type="password"></ion-input>
+    </ion-item>
+    <div>
+      <ion-button expand="block" class="entrar" (click)="cambiar()">Actualizar contraseña</ion-button>
+    </div>
+    <div>
+      <ion-button expand="block" class="salir" (click)="salir()">Salir</ion-button>
+    </div>
+  </div>
+</ion-content>

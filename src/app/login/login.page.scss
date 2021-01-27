@@ -1,0 +1,46 @@
+.background-image {
+    --background: #db1b23;
+}
+
+.logo {
+    height: 50%;
+}
+
+.background-item{
+    --background: #d5444a;
+    width: 80%;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 0.8em;
+    margin-bottom: 0.5em;
+}
+
+.entrar {
+    width: 80%;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    --background: #fae4e4;
+    margin-top: 2em;
+    margin-bottom: 0.8em;
+    color: #9b0b0e;
+    :active {
+        --background: #d5444a; 
+    }
+}
+
+.salir {
+    width: 80%;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    --background: #9b0b0e;
+    :active {
+        --background: #d5444a; 
+    }
+}
+
+.rojo {
+    color: #9b0b0e
+}

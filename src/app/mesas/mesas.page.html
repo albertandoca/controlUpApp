@@ -1,0 +1,46 @@
+<ion-header >
+  <ion-toolbar class="background-header">
+    <ion-title>Juntas receptoras del voto</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content slot="fixed" class="background-image">
+  <ion-toolbar class="toolbar">
+    <ion-buttons slot="end">
+      <ion-icon (click)="resetlogin()" name="refresh"></ion-icon>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-icon (click)="login()" name="log-out"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>  
+  <ion-text class="encabezado">
+    <h5><strong>Provincia: </strong> {{provincia}}</h5>
+    <h5 *ngIf="distrito"><strong>Distrito: </strong> {{distrito}}</h5>
+    <h5><strong>Cantón: </strong> {{canton}}</h5>
+    <h5><strong>Paroquia: </strong> {{parroquia}}</h5>
+    <h5><strong>Recinto: </strong> {{recinto}}</h5>
+  </ion-text>
+  <div class="juntas">
+    <ion-item-divider *ngFor="let junta of juntas; let i = index">
+      <ion-button [style.--background]="junta.ctrl ? '#9b0b0e' : '#d5444a'" [disabled]="junta.sendData">Junta {{junta.numero}} {{junta.sexo}}</ion-button>
+      <ion-buttons class="send">
+        <ion-button slot="icon-only" [disabled]="!junta.takeImg || junta.sendData">
+          <ion-icon name="cloud-upload" ></ion-icon>
+        </ion-button>
+        <ion-button slot="icon-only" [disabled]="!junta.sendData || (junta.sendData && junta.sendImg)">
+          <ion-icon name="images" ></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <ion-buttons class="check">
+        <ion-icon name="checkmark-outline" *ngIf="junta.sendData && !junta.sendImg"></ion-icon>
+        <ion-icon name="checkmark-done-outline" *ngIf="junta.sendData && junta.sendImg"></ion-icon>
+      </ion-buttons>
+        
+      
+    </ion-item-divider>
+    
+    
+
+  </div>
+</ion-content>
+

@@ -1,0 +1,35 @@
+<ion-header >
+  <ion-toolbar class="background-header">
+    <ion-title>Menú</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="background-image">
+  <ion-toolbar class="toolbar">
+    <ion-buttons slot="end">
+      <ion-icon (click)="resetlogin()" name="refresh"></ion-icon>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-icon (click)="login()" name="log-out"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>  
+    <ion-text class="encabezado">
+      <h2 class="titulo">ELECCIONES 2021</h2>
+      <h4>Usuario</h4>
+      <h4>{{usuario}}</h4>
+    </ion-text>
+  <div class="contenedor1">
+    <div>
+      <ion-button expand="block" class="entrar" (click)="presidente()">Presidente</ion-button>
+    </div>
+    <div>
+      <ion-button expand="block" class="entrar" (click)="nacional()">Asamblea Nacional</ion-button>
+    </div>
+    <div>
+      <ion-button expand="block" class="entrar" (click)="provincial()">Asamblea Provincial</ion-button>
+    </div>
+    <div>
+      <ion-button expand="block" class="entrar" (click)="parlamento()">Parlamento Andino</ion-button>
+    </div>
+  </div>
+</ion-content>
