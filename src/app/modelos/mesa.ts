@@ -1,5 +1,6 @@
 export interface Mesa {
     id?: number;
+    idMesa: number;
     idLugar: number;
     sexo: string;
     numero: number;
@@ -7,7 +8,7 @@ export interface Mesa {
     electores: number;
     ctrl: boolean;
     takeImg: boolean;
-    auditoria: boolean;
+    auditoria?: boolean;
     sendData: boolean;
     sendImg: boolean;
 }

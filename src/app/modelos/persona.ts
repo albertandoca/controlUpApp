@@ -1,5 +1,6 @@
 export interface Persona {
     id?: number;
+    idPersona: number;
     cedula: string;
     apellidoPaterno: string;
     apellidoMaterno: string;

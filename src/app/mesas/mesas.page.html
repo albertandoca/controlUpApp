@@ -15,7 +15,7 @@
   </ion-toolbar>  
   <ion-text class="encabezado">
     <h5><strong>Provincia: </strong> {{provincia}}</h5>
-    <h5 *ngIf="distrito"><strong>Distrito: </strong> {{distrito}}</h5>
+    <h5 *ngIf="distrito != 'S/C'"><strong>Distrito: </strong> {{distrito}}</h5>
     <h5><strong>Cantón: </strong> {{canton}}</h5>
     <h5><strong>Paroquia: </strong> {{parroquia}}</h5>
     <h5><strong>Recinto: </strong> {{recinto}}</h5>

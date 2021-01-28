@@ -1,12 +1,12 @@
 <ion-content class="background-image" no-scroll padding>
   <ion-img class="logo" src="assets/background/up2.png"></ion-img>
   <ion-item class="background-item"> 
-    <ion-label class= "rojo" position="floating">Correo electrónico</ion-label>
-    <ion-input></ion-input>
+    <ion-label class= "rojo" position="floating">Usuario</ion-label>
+    <ion-input [(ngModel)]="usuario"></ion-input>
   </ion-item>
   <ion-item class="background-item"> 
     <ion-label class= "rojo" position="floating">Contraseña</ion-label>
-    <ion-input type="password"></ion-input>
+    <ion-input type="password" [(ngModel)]="seguro"></ion-input>
   </ion-item>
   <div>
     <ion-button expand="block" class="entrar" (click)="entrar()">Entrar</ion-button>

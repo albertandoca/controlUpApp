@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS personas(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    idPersona INTEGER,
     cedula VARCHAR(10),
     apellidoPaterno VARCHAR(50),
     apellidoMaterno VARCHAR(50),
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS lugares(
 
 CREATE TABLE IF NOT EXISTS mesas(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    idMesa INTEGER,
     idLugar INTEGER,
     sexo VARCHAR(2),
     numero INTEGER,
@@ -25,7 +27,6 @@ CREATE TABLE IF NOT EXISTS mesas(
     electores INTEGER,
     ctrl BOOLEAN,
     takeImg BOOLEAN,
-    auditoria BOOLEAN,
     sendData BOOLEAN,
     sendImg BOOLEAN
 );

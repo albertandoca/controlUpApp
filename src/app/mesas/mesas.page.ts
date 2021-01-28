@@ -1,5 +1,7 @@
+import { async } from '@angular/core/testing';
+import { OfflineService } from './../services/offline.service';
 import { Router } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Mesa } from '../modelos/mesa';
 
 
@@ -9,182 +11,32 @@ import { Mesa } from '../modelos/mesa';
   templateUrl: './mesas.page.html',
   styleUrls: ['./mesas.page.scss'],
 })
-export class MesasPage implements OnInit {
+export class MesasPage implements OnInit, AfterViewInit {
 
-  provincia: string
-  distrito: string
-  canton: string
-  parroquia: string
-  recinto: string
-  juntas: Array<Mesa>
+  provincia: string;
+  distrito: string;
+  canton: string;
+  parroquia: string;
+  zona: string;
+  recinto: string;
+  juntas: Array<Mesa>;
+  lugar = [];
 
-  constructor(private router:Router) { }
+  constructor(private router:Router, private db1: OfflineService) { }
 o
   ngOnInit() {
-    this.juntas = [
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'F',
-        numero: 1,
-        idPersona: 1,
-        electores: 350,
-        ctrl: true,
-        auditoria: false,
-        takeImg: true,
-        sendData: true,
-        sendImg: false
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'F',
-        numero: 2,
-        idPersona: 1,
-        electores: 350,
-        ctrl: false,
-        takeImg: false,
-        auditoria: false,
-        sendData: false,
-        sendImg: false
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'F',
-        numero: 3,
-        idPersona: 1,
-        electores: 350,
-        ctrl: false,
-        takeImg: true,
-        auditoria: false,
-        sendData: true,
-        sendImg: true
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'F',
-        numero: 24,
-        idPersona: 1,
-        electores: 350,
-        ctrl: true,
-        takeImg: true,
-        auditoria: false,
-        sendData: true,
-        sendImg: true
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'F',
-        numero: 5,
-        idPersona: 1,
-        electores: 350,
-        ctrl: false,
-        takeImg: true,
-        auditoria: false,
-        sendData: false,
-        sendImg: false
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'F',
-        numero: 6,
-        idPersona: 1,
-        electores: 350,
-        ctrl: false,
-        takeImg: true,
-        auditoria: false,
-        sendData: false,
-        sendImg: false
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'M',
-        numero: 1,
-        idPersona: 1,
-        electores: 350,
-        ctrl: false,
-        takeImg: true,
-        auditoria: false,
-        sendData: false,
-        sendImg: false
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'M',
-        numero: 2,
-        idPersona: 1,
-        electores: 350,
-        ctrl: true,
-        takeImg: true,
-        auditoria: false,
-        sendData: false,
-        sendImg: false
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'M',
-        numero: 3,
-        idPersona: 1,
-        electores: 350,
-        ctrl: false,
-        takeImg: true,
-        auditoria: false,
-        sendData: false,
-        sendImg: false
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'M',
-        numero: 4,
-        idPersona: 1,
-        electores: 350,
-        ctrl: false,
-        takeImg: true,
-        auditoria: false,
-        sendData: false,
-        sendImg: false
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'M',
-        numero: 5,
-        idPersona: 1,
-        electores: 350,
-        ctrl: true,
-        takeImg: true,
-        auditoria: false,
-        sendData: false,
-        sendImg: false
-      },
-      {
-        id: 4966,
-        idLugar: 5259,
-        sexo: 'M',
-        numero: 6,
-        idPersona: 1,
-        electores: 350,
-        ctrl: false,
-        takeImg: true,
-        auditoria: false,
-        sendData: false,
-        sendImg: false
-      }
-    ]
-    this.provincia = 'Chimborazo'
-    this.distrito = 'jhjhljk'
-    this.canton = 'Riobamba'
-    this.parroquia = 'Lizarzaburu'
-    this.recinto = 'Colegio Cardenal Spelman de mujeres y acompañantes'
-  
+    this.db1.fetchMesas().subscribe(items => {
+      this.juntas = items
+    })
+    this.db1.fetchLugares().subscribe(items => {
+      this.lugar = items
+    })
+    this.ubicacion();
+  }
+
+  ngAfterViewInit() {
+    
+    
   }
 
   login() {
@@ -209,6 +61,35 @@ o
 
   parlamento() {
 
+  }
+
+  ubicacion() {
+    if (this.lugar.length === 0) {
+      this.db1.ubicacion(this.juntas[0].idLugar)
+      .then(async d => {
+        this.recinto = await this.lugar[0].detalle;
+        this.db1.ubicacion(this.lugar[0].idLugar)
+        .then(async d => {
+          this.zona = await this.lugar[0].detalle;
+          this.db1.ubicacion(this.lugar[0].idLugar)
+          .then(async d => {
+            this.parroquia = await this.lugar[0].detalle;
+            this.db1.ubicacion(this.lugar[0].idLugar)
+            .then(async d => {
+              this.canton = await this.lugar[0].detalle;
+              this.db1.ubicacion(this.lugar[0].idLugar)
+              .then(async d => {
+                this.distrito = await this.lugar[0].detalle;
+                this.db1.ubicacion(this.lugar[0].idLugar)
+                .then(async d => {
+                  this.provincia = await this.lugar[0].detalle;
+                })
+              })
+            })
+          })
+        })
+      })
+    } 
   }
 
 }
