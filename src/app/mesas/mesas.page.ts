@@ -13,13 +13,25 @@ import { Mesa } from '../modelos/mesa';
 })
 export class MesasPage implements OnInit, AfterViewInit {
 
-  provincia: string;
-  distrito: string;
-  canton: string;
-  parroquia: string;
-  zona: string;
-  recinto: string;
-  juntas: Array<Mesa>;
+  provincia: string = '';
+  distrito: string = '';
+  canton: string = '';
+  parroquia: string = '';
+  zona: string = '';
+  recinto: string = '';
+  juntas: Array<Mesa> = [{
+    id: 0,
+    idMesa: 0,
+    idLugar: 0,
+    sexo: '',
+    numero: 0,
+    idPersona: 0,
+    electores: 0,
+    ctrl: false,
+    takeImg: false,
+    sendData: false,
+    sendImg: false
+  }];
   lugar = [];
 
   constructor(private router:Router, private db1: OfflineService) { }
@@ -31,10 +43,15 @@ o
     this.db1.fetchLugares().subscribe(items => {
       this.lugar = items
     })
-    this.ubicacion();
+    this.db1.getMesas().then(d => {
+      this.ubicacion();
+    })
+    
   }
 
   ngAfterViewInit() {
+    
+    
     
     
   }
@@ -47,8 +64,8 @@ o
     this.router.navigateByUrl('resetlogin')
   }
 
-  presidente() {
-
+  enviarMesa() {
+    this.router.navigate(['/foto'])
   }
 
   nacional() {

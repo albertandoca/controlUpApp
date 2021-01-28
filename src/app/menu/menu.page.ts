@@ -18,9 +18,7 @@ export class MenuPage implements OnInit {
       this.persona = item[0];
       this.usuario = `${this.persona.primerNombre} ${this.persona.segundoNombre} ${this.persona.apellidoPaterno} ${this.persona.apellidoMaterno}`
     })
-    this.db1.getMesas().then(d => {
-      console.log('ok')
-    })
+    
   }
 
   login() {

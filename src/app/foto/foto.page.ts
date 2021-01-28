@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { FotoService } from '../services/foto.service';
+
+
 
 @Component({
   selector: 'app-foto',
@@ -7,9 +10,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FotoPage implements OnInit {
 
-  constructor() { }
+
+  constructor(private fotoService: FotoService) { }
 
   ngOnInit() {
+  }
+
+  takePicture() {
+    this.fotoService.takePicture();
   }
 
 }

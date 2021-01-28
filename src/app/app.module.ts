@@ -12,7 +12,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { SQLite } from '@ionic-native/sqlite/ngx';
 import { HttpClientModule } from '@angular/common/http';
 import { SQLitePorter } from '@ionic-native/sqlite-porter/ngx';
-
+import { WebView } from '@ionic-native/ionic-webview/ngx';
+import { Camera } from '@ionic-native/camera/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -23,6 +24,8 @@ import { SQLitePorter } from '@ionic-native/sqlite-porter/ngx';
     SplashScreen,
     SQLite,
     SQLitePorter,
+    WebView,
+    Camera,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

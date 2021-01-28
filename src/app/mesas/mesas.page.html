@@ -22,7 +22,7 @@
   </ion-text>
   <div class="juntas">
     <ion-item-divider *ngFor="let junta of juntas; let i = index">
-      <ion-button [style.--background]="junta.ctrl ? '#9b0b0e' : '#d5444a'" [disabled]="junta.sendData">Junta {{junta.numero}} {{junta.sexo}}</ion-button>
+      <ion-button (click)="enviarMesa()" [style.--background]="junta.ctrl ? '#9b0b0e' : '#d5444a'" [disabled]="junta.sendData">Junta {{junta.numero}} {{junta.sexo}}</ion-button>
       <ion-buttons class="send">
         <ion-button slot="icon-only" [disabled]="!junta.takeImg || junta.sendData">
           <ion-icon name="cloud-upload" ></ion-icon>
