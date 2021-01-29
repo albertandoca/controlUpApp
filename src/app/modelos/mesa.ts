@@ -7,8 +7,4 @@ export interface Mesa {
     idPersona: number;
     electores: number;
     ctrl: boolean;
-    takeImg: boolean;
-    auditoria?: boolean;
-    sendData: boolean;
-    sendImg: boolean;
 }

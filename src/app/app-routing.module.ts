@@ -24,11 +24,11 @@ const routes: Routes = [
     loadChildren: () => import('./menu/menu.module').then( m => m.MenuPageModule)
   },
   {
-    path: 'mesas',
+    path: 'mesas/:tipo',
     loadChildren: () => import('./mesas/mesas.module').then( m => m.MesasPageModule)
   },
   {
-    path: 'foto',
+    path: 'foto/:tipo/:idMesa/:numero/:sexo/:idEleccion/:idPersona',
     loadChildren: () => import('./foto/foto.module').then( m => m.FotoPageModule)
   },
   {

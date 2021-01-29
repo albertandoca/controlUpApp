@@ -1,8 +1,10 @@
+import { Eleccion } from './../modelos/eleccion';
+import { ImgGeneral } from './../modelos/img-general';
 import { Lugar } from './../modelos/lugar';
 import { Partido } from './../modelos/partido';
 import { Persona } from './../modelos/persona';
-import { Injectable } from '@angular/core';
-import { AlertController, Platform } from '@ionic/angular';
+import { Injectable, ɵConsole } from '@angular/core';
+import { Platform } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { SQLitePorter } from '@ionic-native/sqlite-porter/ngx';
@@ -19,6 +21,9 @@ export class OfflineService {
   partidos = new BehaviorSubject([]);
   mesas = new BehaviorSubject([]);
   lugares = new BehaviorSubject([]);
+  imagenes = new BehaviorSubject([]);
+  eleccion = new BehaviorSubject([]);
+  joinMesas = new BehaviorSubject([]);
   
   private isDbReady: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
@@ -53,6 +58,18 @@ export class OfflineService {
 
   fetchLugares(): Observable<Lugar[]> {
     return this.lugares.asObservable();
+  }
+  
+  fetchImagenes(): Observable<ImgGeneral[]> {
+    return this.imagenes.asObservable();
+  }
+
+  fetchEleccion(): Observable<Eleccion[]> {
+    return this.eleccion.asObservable();
+  }
+  
+  fetchJoinMesas(): Observable<Array<any>> {
+    return this.joinMesas.asObservable();
   }
 
   async getFakeData() {
@@ -127,9 +144,8 @@ export class OfflineService {
 
   guardarMesas(data) {
     return this.storage.executeSql(`INSERT INTO mesas 
-    (idMesa, idLugar, sexo, numero, idPersona, electores, ctrl,
-      takeImg, sendData, sendImg) VALUES 
-      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, data)
+    (idMesa, idLugar, sexo, numero, idPersona, electores, ctrl) VALUES 
+      (?, ?, ?, ?, ?, ?, ?)`, data)
     .then(res => {
       console.log('ok')
     })
@@ -149,10 +165,7 @@ export class OfflineService {
             numero: res.rows.item(i).numero,
             idPersona: res.rows.item(i).idPersona,
             electores: res.rows.item(i).electores,
-            ctrl: JSON.parse(res.rows.item(i).ctrl),
-            takeImg: JSON.parse(res.rows.item(i).takeImg),
-            sendData: JSON.parse(res.rows.item(i).sendData),
-            sendImg: JSON.parse(res.rows.item(i).sendImg)
+            ctrl: JSON.parse(res.rows.item(i).ctrl)
           });
         }
       }
@@ -164,7 +177,7 @@ export class OfflineService {
     return this.storage.executeSql('SELECT * FROM partidos', [])
     .then(res => {
       let items: Partido[] = [];
-      if (res.row.length > 0) {
+      if (res.rows.length > 0) {
         for (let i = 0; i < res.row.length; i++) {
           items.push({
             id: res.rows.item(i).id,
@@ -191,6 +204,108 @@ export class OfflineService {
         }
       )
       this.lugares.next(l);
+    })
+  }
+
+  getImagenes(tipoEleccion, idMesa) {
+    return this.storage.executeSql(`SELECT * FROM ${tipoEleccion} WHERE idMesa = ?`, [idMesa])
+    .then(res => {
+      let items: ImgGeneral[] = [];
+      if (res.rows.length > 0) {
+        items.push({
+          id: res.rows.item(0).id,
+          idMesa: res.rows.item(0).idMesa,
+          urlImg1: res.rows.item(0).urlImg1,
+          urlImg2: res.rows.item(0).urlImg2,
+          urlImg3: res.rows.item(0).urlImg3,
+        });
+      }
+      this.imagenes.next(items);
+    });
+  }
+
+  reiniciarImagenes() {
+    this.imagenes.next([]);
+  }
+
+  guardarImagenes(tipoEleccion, data) {
+    return this.storage.executeSql(`INSERT INTO ${tipoEleccion} 
+    (idMesa, urlImg1, urlImg2, urlImg3) VALUES (?, ?, ?, ?)`, data)
+    .then(res => {
+      this.getImagenes(tipoEleccion, data[0]);
+    })
+  }
+
+  actualizarImagenes(tipoEleccion, data) {
+    return this.storage.executeSql(`UPDATE ${tipoEleccion} SET urlImg1 = ?, 
+    urlImg2 = ?, urlImg3 = ? WHERE idMesa = ?`, data)
+    .then(res => {
+      this.getImagenes(tipoEleccion, data[3]);
+    })
+  }
+
+  guardarEleccion(data) {
+    console.log(JSON.stringify(data));
+    return this.storage.executeSql(`INSERT INTO eleccion(tipoEleccion, idMesa, idPersona, takeImg, sendData, sendImg) VALUES (?, ?, ?, ?, ?, ?)`, data)
+    .then(res => {
+
+    })
+    
+  }
+
+  getEleccion(data) {
+    return this.storage.executeSql(`SELECT * FROM eleccion WHERE tipoEleccion = ? AND idMesa = ?`, data)
+    .then(res => {
+      let items: Eleccion[] = [];
+      if (res.rows.length > 0) {
+        items.push({
+          id: res.rows.item(0).id,
+          tipoEleccion: res.rows.item(0).tipoEleccion,
+          idMesa: res.rows.item(0).idMesa,
+          idPersona: res.rows.item(0).idPersona,
+          takeImg: res.rows.item(0).takeImg,
+          sendData: res.rows.item(0).sendData,
+          sendImg: res.rows.item(0).sendImg
+        });
+      }
+      this.eleccion.next(items);
+    });
+    
+  }
+
+  mesasEleccion(data) {
+    console.log(`JOIN: ${JSON.stringify(data)}`);
+    return this.storage.executeSql(`SELECT eleccion.id AS id, mesas.idMesa AS idMesa, mesas.sexo AS sexo, mesas.numero AS numero,
+    mesas.electores AS electores, mesas.ctrl AS ctrl, eleccion.idPersona AS idPersona, eleccion.takeImg AS takeImg,
+    eleccion.sendData AS sendData, eleccion.sendImg 
+    FROM eleccion LEFT JOIN mesas ON eleccion.idMesa = mesas.idMesa
+    WHERE eleccion.tipoEleccion = ? AND eleccion.idPersona = ?`, data).then(res => {
+      let items = [];
+      if (res.rows.length > 0) {
+        
+        for (let i = 0; i < res.rows.length; i++) {
+          items.push({
+            id: parseInt(res.rows.item(i).id),
+            idMesa: parseInt(res.rows.item(i).idMesa),
+            sexo: res.rows.item(i).sexo,
+            numero: parseInt(res.rows.item(i).numero),
+            electores: parseInt(res.rows.item(i).electores),
+            ctrl: JSON.parse(res.rows.item(i).ctrl),
+            idPersona: res.rows.item(i).idPersona,
+            takeImg: JSON.parse(res.rows.item(i).takeImg),
+            sendData: JSON.parse(res.rows.item(i).sendData),
+            sendImg: JSON.parse(res.rows.item(i).sendImg)
+          })
+        }
+      }
+      this.joinMesas.next(items);
+    })
+  }
+
+  updateTakeImg(id, data) {
+    return this.storage.executeSql(`UPDATE eleccion SET takeImg = true WHERE id = ?`, [id])
+    .then(res => {
+      this.mesasEleccion(data);
     })
   }
 

@@ -1,8 +1,12 @@
-import { async } from '@angular/core/testing';
+
 import { OfflineService } from './../services/offline.service';
-import { Router } from '@angular/router';
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { Mesa } from '../modelos/mesa';
+import { Subscription } from 'rxjs';
+import { Platform } from '@ionic/angular';
+import { Eleccion } from '../modelos/eleccion';
+
 
 
 
@@ -11,7 +15,7 @@ import { Mesa } from '../modelos/mesa';
   templateUrl: './mesas.page.html',
   styleUrls: ['./mesas.page.scss'],
 })
-export class MesasPage implements OnInit, AfterViewInit {
+export class MesasPage implements OnInit, AfterViewInit, OnDestroy {
 
   provincia: string = '';
   distrito: string = '';
@@ -27,34 +31,35 @@ export class MesasPage implements OnInit, AfterViewInit {
     numero: 0,
     idPersona: 0,
     electores: 0,
-    ctrl: false,
-    takeImg: false,
-    sendData: false,
-    sendImg: false
+    ctrl: false
   }];
   lugar = [];
+  tipo: number;
+  fetchMesas: Subscription;
+  fetchLugares: Subscription;
+  fetchEleccion: Subscription;
+  fetchJoinMesas: Subscription;
+  plataforma: Subscription;
+  tipoEleccion: string;
+  eleccionEstado: Array<Eleccion>;
+  joinMesas: Array<any>;
+  sendTipo: string;
 
-  constructor(private router:Router, private db1: OfflineService) { }
+  constructor(private router:Router,
+    private db1: OfflineService,
+    private platform: Platform,
+    private activatedRoute: ActivatedRoute) { }
 o
   ngOnInit() {
-    this.db1.fetchMesas().subscribe(items => {
-      this.juntas = items
-    })
-    this.db1.fetchLugares().subscribe(items => {
-      this.lugar = items
-    })
-    this.db1.getMesas().then(d => {
-      this.ubicacion();
-    })
-    
+    this.eleccion();    
   }
 
   ngAfterViewInit() {
-    
-    
-    
-    
+    this.plataforma = this.platform.backButton.subscribe(() => {
+      navigator['app'].exitApp();
+    });
   }
+
 
   login() {
     this.router.navigateByUrl('login')
@@ -64,49 +69,93 @@ o
     this.router.navigateByUrl('resetlogin')
   }
 
-  enviarMesa() {
-    this.router.navigate(['/foto'])
+  enviarMesa(idMesa, numero, sexo, idEleccion, idPersona) {
+    this.router.navigate(['/foto', this.tipo, idMesa, numero, sexo, idEleccion, idPersona]);
   }
 
-  nacional() {
+  eleccion() {
+    this.fetchMesas = this.db1.fetchMesas().subscribe(items => {
+      this.juntas = items
+    })
+    this.fetchLugares = this.db1.fetchLugares().subscribe(items => {
+      this.lugar = items
+    })
 
-  }
+    this.fetchEleccion = this.db1.fetchEleccion().subscribe(items => {
+      this.eleccionEstado = items;
+    })
 
-  provincial() {
+    this.fetchJoinMesas = this.db1.fetchJoinMesas().subscribe(items => {
+      this.joinMesas = items;
+    })
+  
+    this.tipo = parseInt(this.activatedRoute.snapshot.params.tipo);
+    if (this.tipo === 1) {
+      this.tipoEleccion = 'JRV PRESIDENTE';
+      this.sendTipo = 'presidentes';
+    } else if (this.tipo === 2) {
+      this.tipoEleccion = 'JRV ASAMBLEA NACIONAL';
+      this.sendTipo = 'nacionales';
+    } else if (this.tipo === 3) {
+      this.tipoEleccion = 'JRV ASAMBLEA PROVINCIAL';
+      this.sendTipo = 'provinciales';
+    } else if (this.tipo === 4) {
+      this.tipoEleccion = 'JRV PARLAMENTO ANDINO';
+      this.sendTipo = 'parlamentos';
+    }
 
-  }
-
-  parlamento() {
-
+    this.db1.getMesas().then(async d => {
+      this.ubicacion();
+      await this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]).then(d => {
+        if(this.eleccionEstado.length === 0) {
+          this.juntas.forEach(async junta => {
+            let c = await this.db1.guardarEleccion([this.sendTipo, junta.idMesa, junta.idPersona, false, false, false])
+          })
+        }
+      })
+      await this.db1.mesasEleccion([this.sendTipo, this.juntas[0].idPersona])
+    })
   }
 
   ubicacion() {
-    if (this.lugar.length === 0) {
-      this.db1.ubicacion(this.juntas[0].idLugar)
+    this.db1.ubicacion(this.juntas[0].idLugar)
+    .then(async d => {
+      this.recinto = await this.lugar[0].detalle;
+      this.db1.ubicacion(this.lugar[0].idLugar)
       .then(async d => {
-        this.recinto = await this.lugar[0].detalle;
+        this.zona = await this.lugar[0].detalle;
         this.db1.ubicacion(this.lugar[0].idLugar)
         .then(async d => {
-          this.zona = await this.lugar[0].detalle;
+          this.parroquia = await this.lugar[0].detalle;
           this.db1.ubicacion(this.lugar[0].idLugar)
           .then(async d => {
-            this.parroquia = await this.lugar[0].detalle;
+            this.canton = await this.lugar[0].detalle;
             this.db1.ubicacion(this.lugar[0].idLugar)
             .then(async d => {
-              this.canton = await this.lugar[0].detalle;
+              this.distrito = await this.lugar[0].detalle;
               this.db1.ubicacion(this.lugar[0].idLugar)
               .then(async d => {
-                this.distrito = await this.lugar[0].detalle;
-                this.db1.ubicacion(this.lugar[0].idLugar)
-                .then(async d => {
-                  this.provincia = await this.lugar[0].detalle;
-                })
+                this.provincia = await this.lugar[0].detalle;
               })
             })
           })
         })
       })
-    } 
+    })
+  }
+
+  irMenu() {
+    this.router.navigate(['/menu']);
+  }
+
+  exitApp(){
+    navigator['app'].exitApp();
+ }
+
+  ngOnDestroy() {
+    this.fetchLugares.unsubscribe();
+    this.fetchMesas.unsubscribe();
+    this.plataforma.unsubscribe();
   }
 
 }

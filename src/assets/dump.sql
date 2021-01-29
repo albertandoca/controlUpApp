@@ -25,10 +25,7 @@ CREATE TABLE IF NOT EXISTS mesas(
     numero INTEGER,
     idPersona INTEGER,
     electores INTEGER,
-    ctrl BOOLEAN,
-    takeImg BOOLEAN,
-    sendData BOOLEAN,
-    sendImg BOOLEAN
+    ctrl BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS partidos(
@@ -51,6 +48,16 @@ CREATE TABLE IF NOT EXISTS presidentes(
     voto INTEGER,
     idIngreso INTEGER,
     idModifica INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS eleccion(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipoEleccion VARCHAR(50),
+    idMesa BIGINT,
+    idPersona INTEGER,
+    takeImg BOOLEAN,
+    sendData BOOLEAN,
+    sendImg BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS nacionales(

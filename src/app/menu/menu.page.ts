@@ -30,19 +30,19 @@ export class MenuPage implements OnInit {
   }
 
   presidente() {
-    this.router.navigate(['/mesas'])
+    this.router.navigate(['/mesas',1])
   }
 
   nacional() {
-
+    this.router.navigate(['/mesas',2])
   }
 
   provincial() {
-
+    this.router.navigate(['/mesas',3])
   }
 
   parlamento() {
-
+    this.router.navigate(['/mesas',4])
   }
 
 }

@@ -14,6 +14,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { SQLitePorter } from '@ionic-native/sqlite-porter/ngx';
 import { WebView } from '@ionic-native/ionic-webview/ngx';
 import { Camera } from '@ionic-native/camera/ngx';
+import { ImageResizer } from '@ionic-native/image-resizer/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -25,6 +26,7 @@ import { Camera } from '@ionic-native/camera/ngx';
     SQLite,
     SQLitePorter,
     WebView,
+    ImageResizer,
     Camera,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],

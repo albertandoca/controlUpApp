@@ -54,7 +54,15 @@ export class OnlineService {
     .subscribe(res => {
       let p = [];
       if(res.data.id) {
-        p.push(res.data)
+        p.push({
+            idPersona: res.data.id,
+            cedula: res.data.cedula,
+            apellidoPaterno: res.data.apellidoPaterno,
+            apellidoMaterno: res.data.apellidoMaterno,
+            primerNombre: res.data.primerNombre,
+            segundoNombre: res.data.segundoNombre,
+            idLugar: res.data.idLugar
+        })
       } else {
         alert('Usuario o contraseña incorrectas')
         p = [

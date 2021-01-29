@@ -4,6 +4,7 @@ import { Persona } from './../modelos/persona';
 import { OnlineService } from './../services/online.service';
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -28,6 +29,7 @@ export class LoginPage implements OnInit {
   seguro: string;
 
   constructor(private router:Router, 
+              private toastController: ToastController,
               private db: OnlineService,
               private db1: OfflineService) { }
 
@@ -48,11 +50,12 @@ export class LoginPage implements OnInit {
       .then (async d => {
         this.db.fetchPersonas().subscribe(item => {
           this.persona = item[0];
-          if(this.persona.id > 0) {
+          if(this.persona.idPersona > 0) {
             let datos = Object.values(this.persona)
             datos.push(this.seguro)
+            console.log(`persona: ${JSON.stringify(datos)}`);
             this.db1.guardarPersona(datos).then(d =>{
-              this.db.runMesas({idPersona: this.persona.id})
+              this.db.runMesas({idPersona: this.persona.idPersona})
               .then(async d => {
                 await this.db.fetchMesas().subscribe(item => {
                   this.mesas = item;
@@ -71,16 +74,22 @@ export class LoginPage implements OnInit {
         });
       });
     } else {
-      this.router.navigate(['/resetlogin'])
+      this.presentToast('Por favor ingrese un usuario y contraseña válidos')
     }
     
     
   }
 
   salir() {
-    //this.router.navigate(['/resetlogin'])
-    alert('getpersona');
-    this.db.getPersonas();
+    navigator['app'].exitApp();
+  }
+
+  async presentToast(mensaje) {
+    const toast = await this.toastController.create({
+      message: mensaje,
+      duration: 2000
+    });
+    toast.present();
   }
 
 }

@@ -1,18 +1,36 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Tomar fotos</ion-title>
+  <ion-toolbar class="background-header">
+    <ion-title><h4>JRV - {{numero}} {{sexo}} - {{tipoEleccion}}</h4></ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="background-image">
   <ion-slides>
-    <ion-slide *ngFor="let foto of fotoService.fotos">
+    <ion-slide *ngFor="let foto of fotoService.fotos; let i = index">
       <img [src]="foto.data" *ngIf="foto.data">
+      <ion-fab vertical="top" horizontal="start" slot="fixed">
+        <h2 class="pagina">página {{fotoService.contador - i}}</h2>
+      </ion-fab>
+      <ion-fab vertical="top" horizontal="end" slot="fixed">
+        <ion-fab-button (click)="deletePicture(i)" class="rojo">
+          <ion-icon name="trash" ></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
     </ion-slide>
   </ion-slides>
-  <ion-fab vertical="bottom" horizontal="center" slot="fixed">
+  <ion-fab vertical="bottom" horizontal="center" slot="fixed" *ngIf="fotoService.contador < 3">
     <ion-fab-button (click)="takePicture()">
       <ion-icon name="camera"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ion-fab vertical="bottom" horizontal="start" slot="fixed">
+    <ion-fab-button (click)="retornarMesas()">
+      <ion-icon name="arrow-undo"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="fotoService.contador > 2 && bandera == 0">
+    <ion-fab-button (click)="savePictures()">
+      <ion-icon name="save"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 </ion-content>
