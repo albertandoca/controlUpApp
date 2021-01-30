@@ -310,6 +310,7 @@ export class OfflineService {
           })
         }
       }
+      console.log(items)
       this.joinMesas.next(items);
     })
   }
@@ -321,10 +322,10 @@ export class OfflineService {
     })
   }
 
-  updateSendData(tipoEleccion, idMesa) {
+  updateSendData(tipoEleccion, idMesa, idPersona) {
     return this.storage.executeSql(`UPDATE eleccion SET sendData = true WHERE tipoEleccion = ? AND idMesa = ?`, [tipoEleccion, idMesa])
     .then(res => {
-
+      this.mesasEleccion([tipoEleccion, idPersona]);
     })
   }
 

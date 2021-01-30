@@ -44,7 +44,7 @@ export class DatosPage implements OnInit {
     this.fetchImagenes = this.db1.fetchImagenes().subscribe(items => {
       this.imagenes = items;
       if(this.imagenes.length > 0) {
-        console.log('entro if');      
+        this.fotos = [];     
         this.fotos.push(this.imagenes[0].urlImg1);
         this.fotos.push(this.imagenes[0].urlImg2);
         this.fotos.push(this.imagenes[0].urlImg3);
@@ -54,7 +54,7 @@ export class DatosPage implements OnInit {
     console.log(`tipo: ${this.tipo}`);
     this.idMesa = parseInt(this.activatedRoute.snapshot.params.idMesa);
     
-    if (this.tipo === 'presidente') {
+    if (this.tipo === 'presidentes') {
       this.db1.getCandidatos(8871).then(d => { 
         console.log(this.candidatos)
       });
@@ -101,7 +101,7 @@ export class DatosPage implements OnInit {
 
   guardar() {
     this.fotos = [];
-    this.db1.updateSendData(this.tipo, this.idMesa).then(d => {
+    this.db1.updateSendData(this.tipo, this.idMesa, this.persona.idPersona).then(d => {
       this.router.navigate(['/mesas', this.tipoNum]);
     })
     
