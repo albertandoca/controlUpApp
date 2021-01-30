@@ -25,6 +25,7 @@ export class OfflineService {
   eleccion = new BehaviorSubject([]);
   joinMesas = new BehaviorSubject([]);
   candidatos = new BehaviorSubject([]);
+  votos = new BehaviorSubject([]);
   
   private isDbReady: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
@@ -75,6 +76,10 @@ export class OfflineService {
 
   fetchCandidatos(): Observable<Array<any>> {
     return this.candidatos.asObservable();
+  }
+
+  fetchVotos(): Observable<Array<any>> {
+    return this.votos.asObservable();
   }
 
   async getFakeData() {
@@ -357,6 +362,40 @@ export class OfflineService {
       this.candidatos.next(items);
     }).catch(err => {
       console.log(err);
+    })
+  }
+
+  guardarVoto(tipoEleccion, idPartido, idMesa, idPersona) {
+    return this.storage.executeSql(`iNSER INTO ${tipoEleccion}(idPartido, idMesa, voto, idIngreso, idModifica) 
+    VALUES (?, ?, ?, ?, ?)`, [idPartido, idMesa, 0, idPersona, idPersona])
+    .then(res => {
+      this.getVoto(tipoEleccion, idMesa);
+      console.log(JSON.stringify(res.rows.item));
+    })
+  }
+
+  getVoto(tipoEleccion, idMesa) {
+    return this.storage.executeSql(`SELECT  id, idPartido, voto FROM ${tipoEleccion} 
+    WHERE idMesa = ?`, [idMesa]).then(res => {
+      let items = [];
+      if(res.row.length > 0) {
+        for (let i = 0; i < res.rows.length; i++) {
+          items.push({
+            id: parseInt(res.rows.item(i).id),
+            idPartido: parseInt(res.rows.item(i).idPartido),
+            voto: parseInt(res.rows.item(i).voto)
+          })
+        }
+      }
+      console.log(items)
+      this.votos.next(items);
+    })
+  }
+
+  updateVoto(tipoEleccion, voto, id, idMesa) {
+    return this.storage.executeSql(`UPDATE ${tipoEleccion} SET voto = ? 
+    WHERE id = ?`, [voto, id]).then(res => {
+      this.getVoto(tipoEleccion, idMesa);
     })
   }
 
