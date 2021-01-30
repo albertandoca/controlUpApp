@@ -24,10 +24,10 @@
     <ion-item-divider *ngFor="let junta of joinMesas; let i = index">
       <ion-button (click)="enviarMesa(junta.idMesa, junta.numero, junta.sexo, junta.id, junta.idPersona)" [style.--background]="junta.ctrl ? '#9b0b0e' : '#d5444a'" [disabled]="junta.sendData">Junta {{junta.numero}} {{junta.sexo}}</ion-button>
       <ion-buttons class="send">
-        <ion-button slot="icon-only" [disabled]="!junta.takeImg || junta.sendData">
+        <ion-button slot="icon-only" (click)="enviarDatos(junta.idMesa)" [disabled]="!junta.takeImg || junta.sendData">
           <ion-icon name="cloud-upload" ></ion-icon>
         </ion-button>
-        <ion-button slot="icon-only" [disabled]="!junta.sendData || (junta.sendData && junta.sendImg)">
+        <ion-button slot="icon-only" (click)="enviarImg(junta.idMesa, junta.idPersona)" [disabled]="!junta.sendData || (junta.sendData && junta.sendImg)">
           <ion-icon name="images" ></ion-icon>
         </ion-button>
       </ion-buttons>

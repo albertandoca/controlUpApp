@@ -24,6 +24,7 @@ export class OfflineService {
   imagenes = new BehaviorSubject([]);
   eleccion = new BehaviorSubject([]);
   joinMesas = new BehaviorSubject([]);
+  candidatos = new BehaviorSubject([]);
   
   private isDbReady: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
@@ -70,6 +71,10 @@ export class OfflineService {
   
   fetchJoinMesas(): Observable<Array<any>> {
     return this.joinMesas.asObservable();
+  }
+
+  fetchCandidatos(): Observable<Array<any>> {
+    return this.candidatos.asObservable();
   }
 
   async getFakeData() {
@@ -208,6 +213,8 @@ export class OfflineService {
   }
 
   getImagenes(tipoEleccion, idMesa) {
+    console.log(tipoEleccion);
+    console.log(idMesa);
     return this.storage.executeSql(`SELECT * FROM ${tipoEleccion} WHERE idMesa = ?`, [idMesa])
     .then(res => {
       let items: ImgGeneral[] = [];
@@ -220,6 +227,7 @@ export class OfflineService {
           urlImg3: res.rows.item(0).urlImg3,
         });
       }
+      console.log(items);
       this.imagenes.next(items);
     });
   }
@@ -306,6 +314,44 @@ export class OfflineService {
     return this.storage.executeSql(`UPDATE eleccion SET takeImg = true WHERE id = ?`, [id])
     .then(res => {
       this.mesasEleccion(data);
+    })
+  }
+
+  updateSendData(tipoEleccion, idMesa) {
+    return this.storage.executeSql(`UPDATE eleccion SET sendData = true WHERE tipoEleccion = ? AND idMesa = ?`, [tipoEleccion, idMesa])
+    .then(res => {
+
+    })
+  }
+
+  updateSendImg(tipoEleccion, idMesa, idPersona) {
+    return this.storage.executeSql(`UPDATE eleccion SET sendImg = true WHERE tipoEleccion = ? AND idMesa = ?`, [tipoEleccion, idMesa])
+    .then(res => {
+      this.mesasEleccion([tipoEleccion, idPersona]);
+    })
+  }
+
+  getCandidatos(idLugar) { 
+    console.log(`get candidatos ${idLugar}`);
+    return this.storage.executeSql(`SELECT partidos.detalle AS detalle, partidos.lista AS lista,
+    partidos.urlLogo AS urlLogo FROM partidos LEFT JOIN candidatos 
+    ON partidos.id = candidatos.idPartido WHERE candidatos.idLugar = ?`, [idLugar])
+    .then(res => {
+      console.log(`res ${res}`);
+      let items = [];
+      if (res.rows.length > 0) {
+        for (let i = 0; i < res.rows.length; i++) {
+          items.push({
+            detalle: res.rows.item(i).detalle,
+            lista: res.rows.item(i).lista,
+            urlLogo: res.rows.item(i).urlLogo
+          })
+        }
+      }
+      console.log(items);
+      this.candidatos.next(items);
+    }).catch(err => {
+      console.log(err);
     })
   }
 

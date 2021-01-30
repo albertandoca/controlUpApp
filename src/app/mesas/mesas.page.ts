@@ -150,7 +150,16 @@ o
 
   exitApp(){
     navigator['app'].exitApp();
- }
+  }
+
+  enviarDatos(idMesa) {
+    this.router.navigate(['/datos', this.sendTipo, idMesa]);
+  }
+
+  enviarImg(idMesa, idPersona) {
+    this.db1.updateSendImg(this.sendTipo, idMesa, idPersona)
+
+  }
 
   ngOnDestroy() {
     this.fetchLugares.unsubscribe();
