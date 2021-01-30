@@ -236,6 +236,10 @@ export class OfflineService {
     this.imagenes.next([]);
   }
 
+  reiniciarCandidatos() {
+    this.candidatos.next([]);
+  }
+
   guardarImagenes(tipoEleccion, data) {
     return this.storage.executeSql(`INSERT INTO ${tipoEleccion} 
     (idMesa, urlImg1, urlImg2, urlImg3) VALUES (?, ?, ?, ?)`, data)

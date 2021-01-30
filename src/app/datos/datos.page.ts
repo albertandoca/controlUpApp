@@ -37,6 +37,9 @@ export class DatosPage implements OnInit {
     });
     this.fetchCandidatos = this.db1.fetchCandidatos().subscribe(items => {
       this.candidatos = items;
+      this.candidatos.forEach(candidato => {
+        this.votos.push(0);
+      })
     });
     this.fetchImagenes = this.db1.fetchImagenes().subscribe(items => {
       this.imagenes = items;
@@ -52,20 +55,36 @@ export class DatosPage implements OnInit {
     this.idMesa = parseInt(this.activatedRoute.snapshot.params.idMesa);
     
     if (this.tipo === 'presidente') {
-      this.db1.getCandidatos(8871).then(d => { console.log(this.candidatos)});
-      this.db1.getImagenes('imgPresidentes', this.idMesa).then(d => { console.log(this.imagenes)});
+      this.db1.getCandidatos(8871).then(d => { 
+        console.log(this.candidatos)
+      });
+      this.db1.getImagenes('imgPresidentes', this.idMesa).then(d => { 
+        console.log(this.imagenes
+          )});
       this.tipoNum = 1;
     } else if (this.tipo === 'nacionales') {
-      this.db1.getCandidatos(8872).then(d => { console.log(this.candidatos)});
-      this.db1.getImagenes('imgNacionales', this.idMesa).then(d => { console.log(this.imagenes)});
+      this.db1.getCandidatos(8872).then(d => { 
+        console.log(this.candidatos)
+      });
+      this.db1.getImagenes('imgNacionales', this.idMesa).then(d => { 
+        console.log(this.imagenes)
+      });
       this.tipoNum = 2;
     } else if (this.tipo === 'provinciales') {
-      this.db1.getCandidatos(this.persona.idLugar).then(d => { console.log(this.candidatos)});
-      this.db1.getImagenes('imgProvinciales', this.idMesa).then(d => { console.log(this.imagenes)});
+      this.db1.getCandidatos(this.persona.idLugar).then(d => { 
+        console.log(this.candidatos)
+      });
+      this.db1.getImagenes('imgProvinciales', this.idMesa).then(d => { 
+        console.log(this.imagenes)
+      });
       this.tipoNum = 3;
     } else if (this.tipo === 'parlamentos') {
-      this.db1.getCandidatos(8873).then(d => { console.log(this.candidatos)});
-      this.db1.getImagenes('imgParlamentos', this.idMesa).then(d => { console.log(this.imagenes)});
+      this.db1.getCandidatos(8873).then(d => { 
+        console.log(this.candidatos)
+      });
+      this.db1.getImagenes('imgParlamentos', this.idMesa).then(d => { 
+        console.log(this.imagenes)
+      });
       this.tipoNum = 4;
     }
 
@@ -75,23 +94,25 @@ export class DatosPage implements OnInit {
 
   }
 
+  retornar() {
+    this.fotos = [];
+    this.router.navigate(['/mesas', this.tipoNum])
+  }
+
+  guardar() {
+    this.fotos = [];
+    this.db1.updateSendData(this.tipo, this.idMesa).then(d => {
+      this.router.navigate(['/mesas', this.tipoNum]);
+    })
+    
+  }
+
   siguiente() {
     if (this.contador < this.candidatos.length) {
       this.contador++;
     } else {
       this.contador = 0;
     }
-  }
-
-  retornar() {
-    this.router.navigate(['/mesas', this.tipoNum])
-  }
-
-  guardar() {
-    this.db1.updateSendData(this.tipo, this.idMesa).then(d => {
-      this.router.navigate(['/mesas', this.tipoNum]);
-    })
-    
   }
 
   anterior() {

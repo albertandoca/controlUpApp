@@ -17,7 +17,8 @@ export class MenuPage implements OnInit {
     this.db1.fetchPersona().subscribe(item => {
       this.persona = item[0];
       this.usuario = `${this.persona.primerNombre} ${this.persona.segundoNombre} ${this.persona.apellidoPaterno} ${this.persona.apellidoMaterno}`
-    })
+    });
+    this.db1.reiniciarCandidatos();
     
   }
 
