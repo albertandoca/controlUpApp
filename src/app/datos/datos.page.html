@@ -6,7 +6,7 @@
           <img src="../../assets/img/logo/{{candidato.urlLogo}}">
         </ion-avatar>
         <ion-label>{{candidato.lista}} {{candidato.detalle}}</ion-label>
-        <ion-input inputmode="numeric" autofocus=true maxlength=3 pattern="[0-9]" [(ngModel)]="votos[i]"></ion-input>
+        <ion-input type="number" inputmode="numeric" maxlength=3 placeholder=0 [(ngModel)]="votos[i].voto"></ion-input>
       </ion-item>
     </div>
     
@@ -17,10 +17,10 @@
   
   <ion-content class="fotos">
     <ion-slides>
-      <ion-slide *ngFor="let foto of fotos; let i = index">
+      <ion-slide *ngFor="let foto of fotos; let j = index">
         <img [src]="foto" *ngIf="foto">
         <ion-fab vertical="top" horizontal="start" slot="fixed">
-          <h2 class="pagina">página {{i}}</h2>
+          <h2 class="pagina">página {{j}}</h2>
         </ion-fab>
       </ion-slide>
     </ion-slides>

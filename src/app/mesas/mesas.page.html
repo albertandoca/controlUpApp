@@ -24,10 +24,13 @@
     <ion-item-divider *ngFor="let junta of joinMesas; let i = index">
       <ion-button (click)="enviarMesa(junta.idMesa, junta.numero, junta.sexo, junta.id, junta.idPersona)" [style.--background]="junta.ctrl ? '#9b0b0e' : '#d5444a'" [disabled]="junta.sendData">Junta {{junta.numero}} {{junta.sexo}}</ion-button>
       <ion-buttons class="send">
-        <ion-button slot="icon-only" (click)="enviarDatos(junta.idMesa)" [disabled]="!junta.takeImg || junta.sendData">
+        <ion-button slot="icon-only" *ngIf="junta.sendData < 2" (click)="enviarDatos(junta.idMesa, junta.electores)" [disabled]="!junta.takeImg">
+          <ion-icon name="reader-outline" [style.color]="junta.takeImg ? '#9b0b0e' : 'navy'"></ion-icon>   
+        </ion-button>
+        <ion-button slot="icon-only" *ngIf="junta.sendData > 1" (click)="mensajeGuardar(junta.idMesa, junta.idPersona)" [disabled]="junta.sendData == 3">
           <ion-icon name="cloud-upload" ></ion-icon>
         </ion-button>
-        <ion-button slot="icon-only" (click)="enviarImg(junta.idMesa, junta.idPersona)" [disabled]="!junta.sendData || (junta.sendData && junta.sendImg)">
+        <ion-button slot="icon-only" (click)="enviarImg(junta.idMesa, junta.idPersona)" [disabled]="junta.sendData < 3 || junta.sendImg">
           <ion-icon name="images" ></ion-icon>
         </ion-button>
       </ion-buttons>

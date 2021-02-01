@@ -32,7 +32,7 @@ const routes: Routes = [
     loadChildren: () => import('./foto/foto.module').then( m => m.FotoPageModule)
   },
   {
-    path: 'datos/:tipo/:idMesa',
+    path: 'datos/:tipo/:idMesa/:electores',
     loadChildren: () => import('./datos/datos.module').then( m => m.DatosPageModule)
   },
 ];

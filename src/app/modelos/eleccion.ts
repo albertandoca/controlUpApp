@@ -4,6 +4,6 @@ export interface Eleccion {
     idMesa: number;
     idPersona: number;
     takeImg: boolean;
-    sendData: boolean;
+    sendData: number;
     sendImg: boolean;
 }

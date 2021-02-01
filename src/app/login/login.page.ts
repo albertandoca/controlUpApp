@@ -17,10 +17,9 @@ export class LoginPage implements OnInit {
     id: 0,
     idPersona: 0,
     cedula: '',
-    apellidoPaterno: '',
-    apellidoMaterno: '',
-    primerNombre: '',
-    segundoNombre: '',
+    apellidos: '',
+    nombres: '',
+    correo: '',
     idLugar: 0
   };
   mesas: Mesa[] = [];
@@ -46,22 +45,29 @@ export class LoginPage implements OnInit {
         usuario: this.usuario,
         seguro: this.seguro
       }
-      await this.db.runLogin(this.data)
+      //await this.db.runLogin(this.data)
+      await this.db1.buscarUsuario(this.usuario, this.seguro)
       .then (async d => {
-        this.db.fetchPersonas().subscribe(item => {
-          this.persona = item[0];
+        //this.db.fetchPersonas().subscribe(items => {
+          this.db1.fetchUsuario().subscribe(items => {
+          this.persona = items[0];
           if(this.persona.idPersona > 0) {
             let datos = Object.values(this.persona)
-            datos.push(this.seguro)
+            //datos.push(this.seguro)
             console.log(`persona: ${JSON.stringify(datos)}`);
             this.db1.guardarPersona(datos).then(d =>{
-              this.db.runMesas({idPersona: this.persona.idPersona})
+              //this.db.runMesas({idPersona: this.persona.idPersona})
+              this.db1.buscarUsuarioMesas(this.persona.idPersona)
               .then(async d => {
-                await this.db.fetchMesas().subscribe(item => {
-                  this.mesas = item;
+                //await this.db.fetchMesas().subscribe(item => {
+                  console.log('llegue d')
+                  await this.db1.fetchUsuarioMesas().subscribe(items => {
+                  this.mesas = items;
+                  console.log(this.mesas)
                   if (this.mesas.length > 0) {
                     this.mesas.forEach(mesa => {
                       datos = Object.values(mesa);
+                      console.log('mesasUsuarios:', datos)
                       this.db1.guardarMesas(datos).then(d => {
                         this.router.navigate(['/menu']);
                       })

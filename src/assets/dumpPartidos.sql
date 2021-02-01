@@ -64,13 +64,14 @@ INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('ALIANZA RENACE 
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('MINGA POR LA VIDA', '2-18-62', 'lista2-18-62.png');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('UNIDAD POR EL FUTURO', '67-33', 'lista67-33.png');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('ALIANZA UNETE', '100-65-6', 'lista100-65-6.png');
+INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('ALIANZA COALICION DEL MIGRANTE', '3-17-51', 'lista3-17-51.png');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('ARAUZ GALARZA ANDRES DAVID', '1-5', 'arauz.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('GUTIERREZ BORBUA LUCIO EDWIN', '3', 'gutierrez.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('ALMEIDA ESPINOZA CARLOS GERSON ALTEMAR', '4', 'almeida.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('ROMERO CARBO ISIDRO PERFECTO', '8', 'romero.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('SAGNAY DE LA BASTIDA CARLOS FRANCISCO', '10', 'sagnay.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('HERVAS MORA MARCELO XAVIER', '12', 'hervas.jpeg');
-INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('FREILE VALLEJO PEDRO JOSE', '16', 'freile,jpeg');
+INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('FREILE VALLEJO PEDRO JOSE', '16', 'freile.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('MONTUFAR MANCHENO CESAR', '17-51', 'montufar.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('PEREZ GUARTAMBEL YAKU SACHA', '18', 'perez.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('ANDRADE SALVADOR GIOVANNY MARCELO', '19', 'andrade.jpeg');

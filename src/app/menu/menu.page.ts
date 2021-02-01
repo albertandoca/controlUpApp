@@ -2,6 +2,7 @@ import { OfflineService } from './../services/offline.service';
 import { Persona } from './../modelos/persona';
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-menu',
@@ -11,12 +12,13 @@ import { Component, OnInit } from '@angular/core';
 export class MenuPage implements OnInit {
   persona: Persona;
   usuario: string
-  constructor(private router:Router, private db1: OfflineService) { }
+  constructor(private router:Router, private db1: OfflineService, public toastController: ToastController) { }
 
   ngOnInit() {
     this.db1.fetchPersona().subscribe(item => {
       this.persona = item[0];
-      this.usuario = `${this.persona.primerNombre} ${this.persona.segundoNombre} ${this.persona.apellidoPaterno} ${this.persona.apellidoMaterno}`
+      console.log(this.persona)
+      this.usuario = `${this.persona.nombres} ${this.persona.apellidos}`
     });
     this.db1.reiniciarCandidatos();
     
@@ -27,7 +29,8 @@ export class MenuPage implements OnInit {
   }
 
   resetlogin() {
-    this.router.navigate(['/resetlogin'])
+    //this.router.navigate(['/resetlogin'])
+    this.mensajeGeneral('La aplicación se encuentra actualizada', 'top')
   }
 
   presidente() {
@@ -46,4 +49,12 @@ export class MenuPage implements OnInit {
     this.router.navigate(['/mesas',4])
   }
 
+  async mensajeGeneral(msg, pos) {
+    const toast = await this.toastController.create({
+      message: msg,
+      position: pos,
+      duration: 4000
+    });
+    toast.present();
+  }
 }

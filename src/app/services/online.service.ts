@@ -9,8 +9,6 @@ export interface DataRx {
   msg: string;
 }
 
-
-
 @Injectable({
   providedIn: 'root'
 })
@@ -20,10 +18,9 @@ export class OnlineService {
     id: 0,
     idPersona: 0,
     cedula: '',
-    apellidoPaterno: '',
-    apellidoMaterno: '',
-    primerNombre: '',
-    segundoNombre: '',
+    apellidos: '',
+    nombres: '',
+    correo:'',
     idLugar: 0
   }]);
   mesas = new BehaviorSubject([]);
@@ -57,10 +54,9 @@ export class OnlineService {
         p.push({
             idPersona: res.data.id,
             cedula: res.data.cedula,
-            apellidoPaterno: res.data.apellidoPaterno,
-            apellidoMaterno: res.data.apellidoMaterno,
-            primerNombre: res.data.primerNombre,
-            segundoNombre: res.data.segundoNombre,
+            apellidos: res.data.apellidos,
+            nombres: res.data.nombres,
+            correo: res.data.correo,
             idLugar: res.data.idLugar
         })
       } else {
@@ -70,10 +66,9 @@ export class OnlineService {
             id: 0,
             idPersona: 0,
             cedula: '',
-            apellidoPaterno: '',
-            apellidoMaterno: '',
+            apellidos: '',
             primerNombre: '',
-            segundoNombre: '',
+            correo: '',
             idLugar: 0
           }
         ]

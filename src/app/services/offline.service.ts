@@ -1,3 +1,4 @@
+import { Voto } from './../modelos/voto';
 import { Eleccion } from './../modelos/eleccion';
 import { ImgGeneral } from './../modelos/img-general';
 import { Lugar } from './../modelos/lugar';
@@ -26,6 +27,8 @@ export class OfflineService {
   joinMesas = new BehaviorSubject([]);
   candidatos = new BehaviorSubject([]);
   votos = new BehaviorSubject([]);
+  usuario = new BehaviorSubject([]);
+  usuarioMesas = new BehaviorSubject([]);
   
   private isDbReady: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
@@ -54,8 +57,16 @@ export class OfflineService {
     return this.personas.asObservable();
   }
 
+  fetchUsuario(): Observable<Persona[]> {
+    return this.usuario.asObservable();
+  }
+
   fetchMesas(): Observable<Mesa[]> {
     return this.mesas.asObservable();
+  }
+
+  fetchUsuarioMesas(): Observable<Mesa[]> {
+    return this.usuarioMesas.asObservable();
   }
 
   fetchLugares(): Observable<Lugar[]> {
@@ -78,7 +89,7 @@ export class OfflineService {
     return this.candidatos.asObservable();
   }
 
-  fetchVotos(): Observable<Array<any>> {
+  fetchVotos(): Observable<Voto[]> {
     return this.votos.asObservable();
   }
 
@@ -128,23 +139,23 @@ export class OfflineService {
             id: res.rows.item(i).id,
             idPersona: res.rows.item(i).idPersona,
             cedula: res.rows.item(i).cedula,
-            apellidoPaterno: res.rows.item(i).apellidoPaterno,
-            apellidoMaterno: res.rows.item(i).apellidoMaterno,
-            primerNombre: res.rows.item(i).primerNombre,
-            segundoNombre: res.rows.item(i).segundoNombre,
+            apellidos: res.rows.item(i).apellidos,
+            nombres: res.rows.item(i).nombres,
+            correo: res.rows.item(i).correo,
             idLugar: res.rows.item(i).idLugar,
             seguro: res.rows.item(i).seguro
           });
         }
       }
+      console.log(items)
       this.personas.next(items);
     });
   }
 
   guardarPersona(data) {
     return this.storage.executeSql(`INSERT INTO personas 
-    (idPersona, cedula, apellidoPaterno, apellidoMaterno, primerNombre, 
-    segundoNombre, idLugar, seguro) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, data)
+    (idPersona, cedula, apellidos, nombres, 
+    correo, idLugar, seguro) VALUES (?, ?, ?, ?, ?, ?, ?)`, data)
     .then(res => {
       this.getPersona();
     }).catch(err => {
@@ -276,13 +287,13 @@ export class OfflineService {
       let items: Eleccion[] = [];
       if (res.rows.length > 0) {
         items.push({
-          id: res.rows.item(0).id,
+          id: parseInt(res.rows.item(0).id),
           tipoEleccion: res.rows.item(0).tipoEleccion,
-          idMesa: res.rows.item(0).idMesa,
-          idPersona: res.rows.item(0).idPersona,
-          takeImg: res.rows.item(0).takeImg,
-          sendData: res.rows.item(0).sendData,
-          sendImg: res.rows.item(0).sendImg
+          idMesa: parseInt(res.rows.item(0).idMesa),
+          idPersona: parseInt(res.rows.item(0).idPersona),
+          takeImg: JSON.parse(res.rows.item(0).takeImg),
+          sendData: parseInt(res.rows.item(0).sendData),
+          sendImg: JSON.parse(res.rows.item(0).sendImg)
         });
       }
       this.eleccion.next(items);
@@ -310,12 +321,12 @@ export class OfflineService {
             ctrl: JSON.parse(res.rows.item(i).ctrl),
             idPersona: res.rows.item(i).idPersona,
             takeImg: JSON.parse(res.rows.item(i).takeImg),
-            sendData: JSON.parse(res.rows.item(i).sendData),
+            sendData: parseInt(res.rows.item(i).sendData),
             sendImg: JSON.parse(res.rows.item(i).sendImg)
           })
         }
       }
-      console.log(items)
+      console.log(JSON.stringify(items));
       this.joinMesas.next(items);
     })
   }
@@ -327,9 +338,10 @@ export class OfflineService {
     })
   }
 
-  updateSendData(tipoEleccion, idMesa, idPersona) {
-    return this.storage.executeSql(`UPDATE eleccion SET sendData = true WHERE tipoEleccion = ? AND idMesa = ?`, [tipoEleccion, idMesa])
+  updateSendData(tipoEleccion, idMesa, idPersona, send) {
+    return this.storage.executeSql(`UPDATE eleccion SET sendData = ? WHERE tipoEleccion = ? AND idMesa = ?`, [send, tipoEleccion, idMesa])
     .then(res => {
+
       this.mesasEleccion([tipoEleccion, idPersona]);
     })
   }
@@ -343,7 +355,7 @@ export class OfflineService {
 
   getCandidatos(idLugar) { 
     console.log(`get candidatos ${idLugar}`);
-    return this.storage.executeSql(`SELECT partidos.detalle AS detalle, partidos.lista AS lista,
+    return this.storage.executeSql(`SELECT partidos.id AS idPartido, partidos.detalle AS detalle, partidos.lista AS lista,
     partidos.urlLogo AS urlLogo FROM partidos LEFT JOIN candidatos 
     ON partidos.id = candidatos.idPartido WHERE candidatos.idLugar = ?`, [idLugar])
     .then(res => {
@@ -352,6 +364,7 @@ export class OfflineService {
       if (res.rows.length > 0) {
         for (let i = 0; i < res.rows.length; i++) {
           items.push({
+            idPartido: res.rows.item(i).idPartido,
             detalle: res.rows.item(i).detalle,
             lista: res.rows.item(i).lista,
             urlLogo: res.rows.item(i).urlLogo
@@ -365,24 +378,29 @@ export class OfflineService {
     })
   }
 
-  guardarVoto(tipoEleccion, idPartido, idMesa, idPersona) {
-    return this.storage.executeSql(`iNSER INTO ${tipoEleccion}(idPartido, idMesa, voto, idIngreso, idModifica) 
-    VALUES (?, ?, ?, ?, ?)`, [idPartido, idMesa, 0, idPersona, idPersona])
+  guardarVoto(tipoEleccion, idPartido, idMesa, voto, idPersona) {
+    console.log('estamos en voto')
+    return this.storage.executeSql(`INSERT INTO ${tipoEleccion}(idPartido, idMesa, voto, idIngreso, idModifica) 
+    VALUES (?, ?, ?, ?, ?)`, [idPartido, idMesa, voto, idPersona, idPersona])
     .then(res => {
       this.getVoto(tipoEleccion, idMesa);
-      console.log(JSON.stringify(res.rows.item));
+      
+    }).catch(err =>{
+      console.log(err);
     })
   }
 
   getVoto(tipoEleccion, idMesa) {
-    return this.storage.executeSql(`SELECT  id, idPartido, voto FROM ${tipoEleccion} 
+    
+    return this.storage.executeSql(`SELECT  id, idPartido, idMesa, voto FROM ${tipoEleccion} 
     WHERE idMesa = ?`, [idMesa]).then(res => {
-      let items = [];
-      if(res.row.length > 0) {
+      let items: Voto[] = [];
+      if(res.rows.length > 0) {
         for (let i = 0; i < res.rows.length; i++) {
           items.push({
             id: parseInt(res.rows.item(i).id),
             idPartido: parseInt(res.rows.item(i).idPartido),
+            idMesa: parseInt(res.rows.item(i).idMesa),
             voto: parseInt(res.rows.item(i).voto)
           })
         }
@@ -397,6 +415,65 @@ export class OfflineService {
     WHERE id = ?`, [voto, id]).then(res => {
       this.getVoto(tipoEleccion, idMesa);
     })
+  }
+
+  buscarUsuario(correo, seguro) {
+    console.log('usuario: ', correo, seguro)
+    return this.storage.executeSql(`SELECT * FROM usuarios WHERE correo = ? AND seguro = ?`, [correo, seguro])
+    .then(res => {
+      let items: Persona[] = [];
+      if (res.rows.length > 0) {
+        for (let i = 0; i < res.rows.length; i++) {
+          items.push({
+            idPersona: res.rows.item(i).id,
+            cedula: res.rows.item(i).cedula,
+            apellidos: res.rows.item(i).apellidos,
+            nombres: res.rows.item(i).nombres,
+            correo: res.rows.item(i).correo,
+            idLugar: res.rows.item(i).idLugar,
+            seguro: res.rows.item(i).seguro
+          });
+        }
+      } else {
+        alert("Usuario o contraseña inválidos");
+        items.push({
+          id: 0,
+          idPersona: 0,
+          cedula: '',
+          apellidos: '',
+          nombres: '',
+          correo: '',
+          idLugar: 0,
+          seguro: ''
+        });
+
+      }
+      console.log(items);
+      this.usuario.next(items);
+    })
+  }
+
+
+  buscarUsuarioMesas(idPersona) {
+   console.log('buscarUsuarios mesa')
+    return this.storage.executeSql(`SELECT idMesa, idLugar, sexo, numero, idPersona, electores, ctrl FROM mesasUsuarios WHERE idPersona = ?`, [idPersona])
+    .then(res => {
+      let items: Mesa[] = [];
+      if (res.rows.length > 0) {
+        for (let i = 0; i < res.rows.length; i++) {
+          items.push({
+            idMesa: res.rows.item(i).idMesa,
+            idLugar: res.rows.item(i).idLugar,
+            sexo: res.rows.item(i).sexo,
+            numero: res.rows.item(i).numero,
+            idPersona: res.rows.item(i).idPersona,
+            electores: res.rows.item(i).electores,
+            ctrl: JSON.parse(res.rows.item(i).ctrl)
+          });
+        }
+      }
+      this.usuarioMesas.next(items);
+    });
   }
 
 }

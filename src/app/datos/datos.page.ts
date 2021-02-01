@@ -1,3 +1,4 @@
+import { Voto } from './../modelos/voto';
 import { ImgGeneral } from './../modelos/img-general';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Persona } from './../modelos/persona';
@@ -5,7 +6,6 @@ import { Subscription } from 'rxjs';
 import { OfflineService } from './../services/offline.service';
 import { Component, OnInit } from '@angular/core';
 import { ToastController } from '@ionic/angular';
-import { Console } from 'console';
 
 @Component({
   selector: 'app-datos',
@@ -24,8 +24,9 @@ export class DatosPage implements OnInit {
   tipo: string;
   idMesa: number;
   contador: number = 0;
-  votos: Array<number> = [];
+  votos: Voto[] = [];
   tipoNum: number;
+  electores: number;
 
 
   constructor(private db1: OfflineService,
@@ -37,15 +38,17 @@ export class DatosPage implements OnInit {
   ngOnInit() {
     this.tipo = this.activatedRoute.snapshot.params.tipo;
     this.idMesa = parseInt(this.activatedRoute.snapshot.params.idMesa);
+    this.electores = parseInt(this.activatedRoute.snapshot.params.electores);
 
     this.fetchPersona = this.db1.fetchPersona().subscribe(items => {
       this.persona = items[0];
     });
     this.fetchCandidatos = this.db1.fetchCandidatos().subscribe(items => {
       this.candidatos = items;
-      this.candidatos.forEach(candidato => {
+      console.log('presidentes5555', this.candidatos)
+      /*this.candidatos.forEach(candidato => {
         this.votos.push(0);
-      })
+      })*/
     });
 
 
@@ -63,20 +66,10 @@ export class DatosPage implements OnInit {
       this.votos = items;
     })
     
-    this.db1.getVoto(this.tipo, this.idMesa).then(d => {
-      if(this.votos.length === 0) {
-        this.candidatos.forEach(candidato => {
-          this.db1.guardarVoto(this.tipo, candidato.idPartido, this.idMesa, this.persona.idPersona)
-        })
-      }
-    })
-
-    
-    
     
     if (this.tipo === 'presidentes') {
       this.db1.getCandidatos(8871).then(d => { 
-        console.log(this.candidatos)
+        console.log('presidentes', this.candidatos)
       });
       this.db1.getImagenes('imgPresidentes', this.idMesa).then(d => { 
         console.log(this.imagenes
@@ -108,58 +101,96 @@ export class DatosPage implements OnInit {
       this.tipoNum = 4;
     }
 
+    this.db1.getVoto(this.tipo, this.idMesa).then(d => {
+      console.log(`estamos en getvotos ${this.votos}`)
+      if(this.votos.length === 0) {
+        console.log(`estamos en cero v ${this.votos}`)
+        this.candidatos.forEach(candidato => {
+          let vo: number = null;
+          console.log(this.tipo, candidato.idPartido, this.idMesa, this.persona.idPersona);
+          this.db1.guardarVoto(this.tipo, candidato.idPartido, this.idMesa, vo, this.persona.idPersona)
+        })
+      }
+    })
     
 
   }
 
   retornar() {
     this.fotos = [];
+    this.votos = [];
     this.router.navigate(['/mesas', this.tipoNum])
   }
 
-  guardar() {
-    
-    this.fotos = [];
+  async guardar() {
+    console.log(this.votos);
+    let bandera = 0;
+    if(this.votos.length === this.candidatos.length){
+      for await (let vot of this.votos) {
+        if(isNaN(vot.voto) && (vot.voto % 1) !== 0 && (vot.voto < 0 && vot.voto > this.electores)) {
+          bandera = 1;
+          break;
+        }
+      }
+      if (bandera === 1) {
+        this.mensajeGuardar();
+      } else {
+        
+        this.db1.updateSendData(this.tipo, this.idMesa, this.persona.idPersona, 2).then(d => {
+          this.fotos = [];
+          this.votos = [];
+          this.router.navigate(['/mesas', this.tipoNum]);
+        })
+      }
+      
+    } else {
+      this.mensajeGeneral('No se ingresó la votación de todos los candidatos, no se puede almacenar', 'top');
+    }
 
-    this.db1.updateSendData(this.tipo, this.idMesa, this.persona.idPersona).then(d => {
-      this.router.navigate(['/mesas', this.tipoNum]);
-    })
     
   }
 
   siguiente() {
-    if (this.votos[this.contador] > 350) {
-      this.mensajeGeneral('El valor ingresado es mayor al permitido', 'top')
-    }
-
-    if (this.contador < this.candidatos.length) {
-      this.contador++;
+    let voto = this.votos[this.contador].voto;
+    if (!isNaN(voto) && (voto % 1) === 0 && (voto >= 0 && voto <= this.electores)) {
+      if (this.contador < this.candidatos.length - 1) {
+        this.contador++;
+      } else {
+        this.contador = 0;
+      }
+      console.log(this.contador)
     } else {
-      this.contador = 0;
+      alert('Los votos ingresados son incorrectos o superiores al número de electores, por favor verifique');
     }
   }
 
   anterior() {
-    if (this.contador >= 0 ) {
-      this.contador--;
+    let voto = this.votos[this.contador].voto;
+    if (!isNaN(voto) && (voto % 1) === 0 && (voto >= 0 && voto <= this.electores)) {
+      if (this.contador > 0 ) {
+        this.contador--;
+      } else {
+        this.contador = this.candidatos.length - 1;
+      }
     } else {
-      this.contador = this.candidatos.length - 1;
+      alert('Los votos ingresados son incorrectos o superiores al número de electores, por favor verifique');
     }
+    console.log(this.contador)
   }
 
   async mensajeGeneral(msg, pos) {
     const toast = await this.toastController.create({
       message: msg,
       position: pos,
-      duration: 2000
+      duration: 4000
     });
     toast.present();
   }
 
-  async presentToastWithOptions(msg) {
+  async mensajeGuardar() {
     const toast = await this.toastController.create({
-      header: 'Toast header',
-      message: 'Click to Close',
+      header: 'ACTA INCONSISTENTE',
+      message: 'Los valores que ingreso están incompletos o existen errores. Puede verificar los datos o continuar con el almacenamiento',
       position: 'top',
       buttons: [
         {
@@ -167,7 +198,11 @@ export class DatosPage implements OnInit {
           icon: 'star',
           text: 'Favorite',
           handler: () => {
-            console.log('Favorite clicked');
+            this.db1.updateSendData(this.tipo, this.idMesa, this.persona.idPersona, 2).then(d => {
+              this.fotos = [];
+              this.votos = [];
+              this.router.navigate(['/mesas', this.tipoNum]);
+            })
           }
         }, {
           text: 'Done',

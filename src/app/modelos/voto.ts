@@ -3,6 +3,6 @@ export interface Voto {
     idPartido: number;
     idMesa: number;
     voto: number;
-    idIngreso: number;
-    idModifica: number;
+    idIngreso?: number;
+    idModifica?: number;
 }
