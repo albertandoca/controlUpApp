@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Persona } from '../modelos/persona';
 import { Mesa } from '../modelos/mesa';
+import { ToastController } from '@ionic/angular';
 
 export interface DataRx {
   data: any;
@@ -33,7 +34,8 @@ export class OnlineService {
   };
 
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private toastController: ToastController
   ) { 
     
   }
@@ -75,7 +77,9 @@ export class OnlineService {
         
       }
       return this.personas.next(p)
-    })
+    }), error => {
+      this.presentToast('No se pudo conectar con el servidor, verifique su conexión a internet')
+    }
   }
 
   async runMesas(data) {
@@ -95,5 +99,15 @@ export class OnlineService {
     .subscribe(d => {
       alert(JSON.stringify(d))
     })
+  }
+
+  async presentToast(mensaje) {
+    const toast = await this.toastController.create({
+      message: mensaje,
+      position: 'middle',
+      color: 'danger',
+      duration: 2000
+    });
+    toast.present();
   }
 }
