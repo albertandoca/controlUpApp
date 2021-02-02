@@ -16,10 +16,11 @@ export class FotoService {
   public contador: number = 0;
   options: CameraOptions = {
     quality: 100,
-    destinationType: this.camera.DestinationType.FILE_URI,
+    destinationType: this.camera.DestinationType.DATA_URL,
     encodingType: this.camera.EncodingType.JPEG,
     mediaType: this.camera.MediaType.PICTURE,
-    sourceType: this.camera.PictureSourceType.CAMERA
+    sourceType: this.camera.PictureSourceType.CAMERA,
+    correctOrientation: true
   };
 
   constructor(private camera: Camera,
@@ -28,10 +29,11 @@ export class FotoService {
 
   takePicture() {
     this.camera.getPicture(this.options).then((imageData) => {
-      this.fotos.unshift({
-        data: this.webview.convertFileSrc(imageData)
-      });
-
+      let base64Imagen = 'data:image/jpeg;base64,' + imageData;
+        this.fotos.unshift({
+          data: base64Imagen
+        });
+      
       this.contador++;
 
     }, (err) => {
@@ -77,4 +79,32 @@ export class FotoService {
     })
   }
   
+  resizeImg(img, MAX_WIDTH: number = 720,MAX_HEIGHT: number = 1280, quality: number = 0.4, callback) {
+    let canvas: any = document.createElement('canvas');
+    let image = new Image(); 
+    image.onload = () => {
+      let width = image.width;
+      let height = image.height;
+
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      let ctx = canvas.getContext('2d');
+      ctx.drawImage(image, 0, 0, width, height);
+
+      let dataUrl = canvas.toDataURL('image/jpeg', quality);
+      callback(dataUrl);
+    };
+    image.src = img;
+  }
 }

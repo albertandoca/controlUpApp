@@ -167,7 +167,7 @@ o
   enviarImg(idMesa, idPersona) {
     this.db1.updateSendImg(this.sendTipo, idMesa, idPersona);
     this.db1.updateSendData(this.sendTipo, idMesa, idPersona, 3);
-    this.mensajeGeneral('Las imágenes llegaron con éxito al servidor', 'top');
+    this.mensajeGeneral('Las imágenes llegaron con éxito al servidor', 'middle', 'primary');
     this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]);
 
   }
@@ -178,35 +178,37 @@ o
     this.plataforma.unsubscribe();
   }
 
-  async mensajeGeneral(msg, pos) {
+  async mensajeGeneral(msg, pos, color = 'warning') {
     const toast = await this.toastController.create({
       message: msg,
       position: pos,
+      color: color,
       duration: 4000
     });
     toast.present();
   }
 
-  async mensajeGuardar(idMesa, idPersona) {
+  async mensajeGuardar(idMesa, idPersona, electores) {
     const toast = await this.toastController.create({
       header: 'EDITAR O ENVIAR',
-      message: 'Usted puede EDITAR los votos ingresados o ENVIAR al servidor',
-      position: 'top',
+      message: 'Usted puede EDITAR los votos ingresados o GUARDAR en el servidor',
+      position: 'middle',
+      color: 'tertiary',
       buttons: [
         {
-          side: 'start',
+          side: 'end',
           icon: 'star',
           text: 'EDITAR',
           handler: () => {
-            alert('jjjj')
-            this.router.navigate(['/datos', this.sendTipo, this.idMesa, this.electores]);
+            console.log(this.sendTipo, idMesa, electores);
+            this.router.navigate(['/datos', this.sendTipo, idMesa, electores]);
           }
         }, {
-          text: 'ENVIAR',
+          text: 'GUARDAR',
           icon: 'send',
           role: 'cancel',
           handler: () => {
-            this.mensajeGeneral('Los votos llegaron con éxito al servidor', 'top');
+            this.mensajeGeneral('Los datos llegaron con éxito al servidor', 'middle', 'primary');
             console.log(idPersona, this.sendTipo, idMesa)
             this.db1.updateSendData(this.sendTipo, idMesa, idPersona, 3);
             this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]);

@@ -81,3 +81,6 @@ INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('CELI SANTOS GUI
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('VELASCO TORRES JUAN FERNANDO', '25', 'velasco.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('CARRASCO CARPIO PAUL ERNESTO', '33', 'carrasco.jpeg');
 INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('PEÑA PACHECO XIMENA DEL ROCIO', '35', 'pena.jpeg');
+INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('TOTAL DE VOTANTES (FIRMAS Y HUELLAS)', 'TV', 'default.jpeg');
+INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('VOTOS BLANCOS', 'B', 'default.jpeg');
+INSERT or IGNORE INTO partidos(detalle, lista, urlLogo) VALUES ('VOTOS NULOS', 'N', 'default.jpeg');

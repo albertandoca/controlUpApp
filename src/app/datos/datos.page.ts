@@ -45,10 +45,6 @@ export class DatosPage implements OnInit {
     });
     this.fetchCandidatos = this.db1.fetchCandidatos().subscribe(items => {
       this.candidatos = items;
-      console.log('presidentes5555', this.candidatos)
-      /*this.candidatos.forEach(candidato => {
-        this.votos.push(0);
-      })*/
     });
 
 
@@ -102,12 +98,9 @@ export class DatosPage implements OnInit {
     }
 
     this.db1.getVoto(this.tipo, this.idMesa).then(d => {
-      console.log(`estamos en getvotos ${this.votos}`)
       if(this.votos.length === 0) {
-        console.log(`estamos en cero v ${this.votos}`)
         this.candidatos.forEach(candidato => {
           let vo: number = null;
-          console.log(this.tipo, candidato.idPartido, this.idMesa, this.persona.idPersona);
           this.db1.guardarVoto(this.tipo, candidato.idPartido, this.idMesa, vo, this.persona.idPersona)
         })
       }
@@ -116,38 +109,62 @@ export class DatosPage implements OnInit {
 
   }
 
-  retornar() {
-    this.fotos = [];
-    this.votos = [];
-    this.router.navigate(['/mesas', this.tipoNum])
+  async retornar() {
+    const toast = await this.toastController.create({
+      header: 'SALIR SIN GUARDAR',
+      message: 'No se guardaron los datos, está seguro de salir',
+      position: 'middle',
+      color: 'warning',
+      buttons: [
+        {
+          side: 'end',
+          icon: 'star',
+          text: 'SÍ',
+          handler: () => {
+            this.fotos = [];
+            this.votos = [];
+            this.router.navigate(['/mesas', this.tipoNum]);
+          }
+        }, {
+          text: 'NO',
+          icon: 'close-circle-outline',
+          role: 'cancel',
+          handler: () => {
+
+          }
+        }
+      ]
+    });
+    toast.present();
   }
 
   async guardar() {
     console.log(this.votos);
     let bandera = 0;
-    if(this.votos.length === this.candidatos.length){
-      for await (let vot of this.votos) {
-        if(isNaN(vot.voto) && (vot.voto % 1) !== 0 && (vot.voto < 0 && vot.voto > this.electores)) {
-          bandera = 1;
-          break;
-        }
-      }
-      if (bandera === 1) {
-        this.mensajeGuardar();
+    let totalVotos = 0
+    for await (let vot of this.votos) {
+      console.log(vot.voto)
+      if(isNaN(vot.voto)) {
+        this.mensajeGeneral('Se debe ingresar los votos de todos los candidatos', 'middle')
+        bandera = 1;
+        break;
+      } else if ((vot.voto % 1) !== 0 || (vot.voto < 0 && vot.voto > this.electores)) {
+        this.mensajeGeneral(`Uno o varios de los votos ingresados no están en el rango de 0 a ${this.electores}, por favor verifique.`, 'middle');
+        bandera = 2;
+        break;
       } else {
-        
-        this.db1.updateSendData(this.tipo, this.idMesa, this.persona.idPersona, 2).then(d => {
-          this.fotos = [];
-          this.votos = [];
-          this.router.navigate(['/mesas', this.tipoNum]);
-        })
+        totalVotos += vot.voto;
+        console.log(totalVotos);
       }
-      
-    } else {
-      this.mensajeGeneral('No se ingresó la votación de todos los candidatos, no se puede almacenar', 'top');
     }
-
-    
+    if (bandera === 0) {
+      totalVotos -= this.votos[0].voto;
+      if(totalVotos === this.votos[0].voto) {
+        this.guardarVotos();
+      } else {
+        this.mensajeGuardar();
+      }
+    }
   }
 
   siguiente() {
@@ -160,7 +177,7 @@ export class DatosPage implements OnInit {
       }
       console.log(this.contador)
     } else {
-      alert('Los votos ingresados son incorrectos o superiores al número de electores, por favor verifique');
+      this.mensajeGeneral(`Los votos ingresados son incorrectos o superiores al número de electores (${this.electores}), por favor verifique.`, 'middle');
     }
   }
 
@@ -173,15 +190,27 @@ export class DatosPage implements OnInit {
         this.contador = this.candidatos.length - 1;
       }
     } else {
-      alert('Los votos ingresados son incorrectos o superiores al número de electores, por favor verifique');
+      this.mensajeGeneral('Los votos ingresados son incorrectos o superiores al número de electores, por favor verifique', 'middle');
     }
     console.log(this.contador)
   }
 
-  async mensajeGeneral(msg, pos) {
+  guardarVotos() {
+    this.votos.forEach(voto => {
+      this.db1.updateVoto(this.tipo, voto.voto, voto.id, voto.idMesa);
+    })
+    this.db1.updateSendData(this.tipo, this.idMesa, this.persona.idPersona, 2).then(d => {
+      this.fotos = [];
+      this.votos = [];
+      this.router.navigate(['/mesas', this.tipoNum]);
+    })
+  }
+
+  async mensajeGeneral(msg, pos, color = 'warning') {
     const toast = await this.toastController.create({
       message: msg,
       position: pos,
+      color: color,
       duration: 4000
     });
     toast.present();
@@ -190,25 +219,23 @@ export class DatosPage implements OnInit {
   async mensajeGuardar() {
     const toast = await this.toastController.create({
       header: 'ACTA INCONSISTENTE',
-      message: 'Los valores que ingreso están incompletos o existen errores. Puede verificar los datos o continuar con el almacenamiento',
-      position: 'top',
+      message: 'El total de votos no es igual que el número de votantes. Si los votos ingresados corresponden al acta puede GUARDAR. Para verificar los datos clic en EDITAR',
+      position: 'middle',
+      color: 'warning',
       buttons: [
         {
-          side: 'start',
+          side: 'end',
           icon: 'star',
-          text: 'Favorite',
+          text: 'Editar',
           handler: () => {
-            this.db1.updateSendData(this.tipo, this.idMesa, this.persona.idPersona, 2).then(d => {
-              this.fotos = [];
-              this.votos = [];
-              this.router.navigate(['/mesas', this.tipoNum]);
-            })
+            this.mensajeGeneral('Utilice las flechas izquierda o derecha para cambiar de candidato', 'middle')
           }
         }, {
-          text: 'Done',
+          text: 'Guardar',
+          icon: 'save',
           role: 'cancel',
           handler: () => {
-            console.log('Cancel clicked');
+            this.guardarVotos();
           }
         }
       ]

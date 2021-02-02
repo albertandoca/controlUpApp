@@ -7,9 +7,9 @@
 <ion-content class="background-image">
   <ion-slides>
     <ion-slide *ngFor="let foto of fotoService.fotos; let i = index">
-      <img [src]="foto.data" *ngIf="foto.data">
+      <img [src]="foto.data" *ngIf="foto.data" alt="img{{i}}">
       <ion-fab vertical="top" horizontal="start" slot="fixed">
-        <h2 class="pagina">página {{fotoService.contador - i}}</h2>
+        <h2 class="pagina">Página {{fotoService.contador - i}}</h2>
       </ion-fab>
       <ion-fab vertical="top" horizontal="end" slot="fixed">
         <ion-fab-button (click)="deletePicture(i)" class="rojo">

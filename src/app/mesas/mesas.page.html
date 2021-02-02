@@ -27,7 +27,7 @@
         <ion-button slot="icon-only" *ngIf="junta.sendData < 2" (click)="enviarDatos(junta.idMesa, junta.electores)" [disabled]="!junta.takeImg">
           <ion-icon name="reader-outline" [style.color]="junta.takeImg ? '#9b0b0e' : 'navy'"></ion-icon>   
         </ion-button>
-        <ion-button slot="icon-only" *ngIf="junta.sendData > 1" (click)="mensajeGuardar(junta.idMesa, junta.idPersona)" [disabled]="junta.sendData == 3">
+        <ion-button slot="icon-only" *ngIf="junta.sendData > 1" (click)="mensajeGuardar(junta.idMesa, junta.idPersona, junta.electores)" [disabled]="junta.sendData == 3">
           <ion-icon name="cloud-upload" ></ion-icon>
         </ion-button>
         <ion-button slot="icon-only" (click)="enviarImg(junta.idMesa, junta.idPersona)" [disabled]="junta.sendData < 3 || junta.sendImg">

@@ -1,31 +1,26 @@
 <ion-content class="background-image">
-  <ion-fab vertical="top" horizontal="strat" slot="fixed" class="scrollfab">
+  <div>
     <div *ngFor="let candidato of candidatos; let i = index">
       <ion-item class="data" *ngIf="i == contador">
         <ion-avatar slot="start">
-          <img src="../../assets/img/logo/{{candidato.urlLogo}}">
+          <img src="../../assets/img/logo/{{candidato.urlLogo}}" alt="{{candidato.lista}}">
         </ion-avatar>
         <ion-label>{{candidato.lista}} {{candidato.detalle}}</ion-label>
         <ion-input type="number" inputmode="numeric" maxlength=3 placeholder=0 [(ngModel)]="votos[i].voto"></ion-input>
       </ion-item>
     </div>
-    
-  </ion-fab>
-  <div class="datos">
-    
-  </div>
-  
-  <ion-content class="fotos">
-    <ion-slides>
+  </div>  
+  <div class="fotos">
+    <ion-slides class="slides">
       <ion-slide *ngFor="let foto of fotos; let j = index">
         <img [src]="foto" *ngIf="foto">
         <ion-fab vertical="top" horizontal="start" slot="fixed">
-          <h2 class="pagina">página {{j}}</h2>
+          <h2 class="pagina">Página {{j + 1}}</h2>
         </ion-fab>
       </ion-slide>
     </ion-slides>
-  </ion-content>
-  <div class="footer">
+  </div>
+  <ion-fab vertical="bottom" horizontal="end" class="footer">
     <ion-toolbar class="toolbar">
       <ion-buttons slot="start">
         <ion-icon (click)="retornar()" name="arrow-undo"></ion-icon> 
@@ -40,5 +35,5 @@
         <ion-icon (click)="siguiente()" name="arrow-forward-outline"></ion-icon> 
       </ion-buttons>
     </ion-toolbar>  
-  </div>
+  </ion-fab>
 </ion-content>
