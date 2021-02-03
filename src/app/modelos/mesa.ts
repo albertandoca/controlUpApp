@@ -7,4 +7,8 @@ export interface Mesa {
     idPersona: number;
     electores: number;
     ctrl: boolean;
+    presidente: number;
+    nacional: number;
+    provincial: number;
+    parlamento: number;
 }

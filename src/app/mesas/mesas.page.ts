@@ -1,3 +1,4 @@
+import { Persona } from './../modelos/persona';
 import { OnlineService } from './../services/online.service';
 
 import { OfflineService } from './../services/offline.service';
@@ -43,7 +44,11 @@ export class MesasPage implements OnInit, AfterViewInit, OnDestroy {
     numero: 0,
     idPersona: 0,
     electores: 0,
-    ctrl: false
+    ctrl: false,
+    presidente: 0,
+    nacional: 0,
+    provincial: 0,
+    parlamento: 0
   }];
   lugar = [];
   tipo: number;
@@ -53,6 +58,7 @@ export class MesasPage implements OnInit, AfterViewInit, OnDestroy {
   fetchJoinMesas: Subscription;
   fetchVotos: Subscription;
   fetchImg: Subscription;
+  fetchPersona: Subscription;
   plataforma: Subscription;
   tipoEleccion: string;
   eleccionEstado: Array<Eleccion>;
@@ -64,6 +70,7 @@ export class MesasPage implements OnInit, AfterViewInit, OnDestroy {
   urlEleccion: string;
   urlImg: string;
   tipoImg: string;
+  persona: Persona;
 
   constructor(private router:Router,
     private db1: OfflineService,
@@ -111,6 +118,10 @@ o
     this.fetchJoinMesas = this.db1.fetchJoinMesas().subscribe(items => {
       this.joinMesas = items;
     })
+
+    this.fetchPersona = this.db1.fetchPersona().subscribe(items => {
+      this.persona = items[0];
+    })
   
     this.tipo = parseInt(this.activatedRoute.snapshot.params.tipo);
     if (this.tipo === 1) {
@@ -144,7 +155,48 @@ o
       await this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]).then(d => {
         if(this.eleccionEstado.length === 0) {
           this.juntas.forEach(async junta => {
-            let c = await this.db1.guardarEleccion([this.sendTipo, junta.idMesa, junta.idPersona, false, 0, false])
+            let takeImg = false;
+            let sendImg = 0;
+            let sendData = false;
+            if(this.tipo === 1) {
+              if(junta.presidente === 1) {
+                takeImg = true;
+                sendImg = 2;
+              } else if(junta.presidente === 2) {
+                takeImg = true;
+                sendImg = 2;
+                sendData = true
+              }
+            } else if(this.tipo === 2) {
+              if(junta.nacional === 1) {
+                takeImg = true;
+                sendImg = 2;
+              } else if(junta.nacional === 2) {
+                takeImg = true;
+                sendImg = 3;
+                sendData = true
+              }
+            } else if(this.tipo === 3) {
+              if(junta.provincial === 1) {
+                takeImg = true;
+                sendImg = 2;
+              } else if(junta.provincial === 2) {
+                takeImg = true;
+                sendImg = 2;
+                sendData = true
+              }
+            } else if(this.tipo === 4) {
+              if(junta.parlamento === 1) {
+                takeImg = true;
+                sendImg = 2;
+              } else if(junta.parlamento === 2) {
+                takeImg = true;
+                sendImg = 2;
+                sendData = true
+              }
+            }
+
+            let c = await this.db1.guardarEleccion([this.sendTipo, junta.idMesa, junta.idPersona, takeImg, sendImg, sendData])
           })
         }
       })
@@ -153,30 +205,38 @@ o
   }
 
   ubicacion() {
-    this.db1.ubicacion(this.juntas[0].idLugar)
-    .then(async d => {
-      this.recinto = await this.lugar[0].detalle;
-      this.db1.ubicacion(this.lugar[0].idLugar)
+    console.log('this.ubicacion')
+    if(this.juntas.length === 0) {
+      this.mensajeGeneral('No tiene mesas asignadas, comuniquese con el coordinador provincial', 'middle')
+      this.router.navigate(['/login'])
+    } else {
+      console.log('paso ubica')
+      this.db1.ubicacion(this.juntas[0].idLugar)
       .then(async d => {
-        this.zona = await this.lugar[0].detalle;
+        this.recinto = await this.lugar[0].detalle;
         this.db1.ubicacion(this.lugar[0].idLugar)
         .then(async d => {
-          this.parroquia = await this.lugar[0].detalle;
+          this.zona = await this.lugar[0].detalle;
           this.db1.ubicacion(this.lugar[0].idLugar)
           .then(async d => {
-            this.canton = await this.lugar[0].detalle;
+            this.parroquia = await this.lugar[0].detalle;
             this.db1.ubicacion(this.lugar[0].idLugar)
             .then(async d => {
-              this.distrito = await this.lugar[0].detalle;
+              this.canton = await this.lugar[0].detalle;
               this.db1.ubicacion(this.lugar[0].idLugar)
               .then(async d => {
-                this.provincia = await this.lugar[0].detalle;
+                this.distrito = await this.lugar[0].detalle;
+                this.db1.ubicacion(this.lugar[0].idLugar)
+                .then(async d => {
+                  this.provincia = await this.lugar[0].detalle;
+                })
               })
             })
           })
         })
       })
-    })
+    }
+    
   }
 
   irMenu() {
@@ -246,7 +306,12 @@ o
           let imagen = data2;
           console.log(data2)
           imagenes.data.urlImg3 = await imagen.split(',')[1];
-          this.http.put<DataRx>(`${this.urlServer}${this.urlImg}`, imagenes, this.httpOptions)
+          let datos = {
+            data: imagenes.data,
+            frase: this.persona.frase,
+            seguro: this.persona.cedula
+          }
+          this.http.put<DataRx>(`${this.urlServer}${this.urlImg}`, datos, this.httpOptions)
           .subscribe(items => {
             if(!items) {
               this.mensajeGeneral('No se guardaron los datos, revise su conexión a internet o intentelo más tarde.', 'middle', 'danger');
@@ -274,32 +339,7 @@ o
       await this.convertir(data[0].urlImg1, data[0].urlImg2, data[0].urlImg3, idMesa, idPersona).then(res => {
         console.log('ddd',res)
       })
-      
     })
-/*
-      let datos = {
-        data: {
-          idMesa: data[0].idMesa,
-          urlImg1: url1,
-          urlImg2: url2,
-          urlImg3: url3
-        }
-      } 
-      console.log('datosd', datos)
-      this.http.put<DataRx>(`${this.urlServer}${this.urlImg}`, datos, this.httpOptions)
-      .subscribe(items => {
-        if(!items) {
-          this.mensajeGeneral('No se guardaron los datos, revise su conexión a internet o intentelo más tarde.', 'middle', 'danger');
-        } else {
-          this.mensajeGeneral('Las imágenes llegaron con éxito al servidor', 'middle', 'primary');
-          this.db1.updateSendImg(this.sendTipo, idMesa, idPersona);
-          this.db1.updateSendData(this.sendTipo, idMesa, idPersona, 3);
-          this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]);
-        } 
-      }, error => {
-        this.mensajeGeneral('Las imágenes no se guardaron en el servidor, por favor conpruebe su conexión a internet e intente más tarde.', 'middle', 'danger')
-      });  
-    })*/
   }
 
   ngOnDestroy() {
@@ -341,7 +381,11 @@ o
             let data : any;
             this.db1.getVoto(this.sendTipo, idMesa).then(d => {
               this.fetchVotos = this.db1.fetchVotos().subscribe(items => {
-                data = { data: items };
+                data = {
+                  data: items,
+                  frase: this.persona.frase,
+                  seguro: this.persona.cedula
+                };
               }); 
               this.http.put<DataRx>(`${this.urlServer}${this.urlEleccion}`, data, this.httpOptions)
               .subscribe(items => {

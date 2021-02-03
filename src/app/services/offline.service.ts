@@ -143,7 +143,7 @@ export class OfflineService {
             nombres: res.rows.item(i).nombres,
             correo: res.rows.item(i).correo,
             idLugar: res.rows.item(i).idLugar,
-            seguro: res.rows.item(i).seguro
+            frase: res.rows.item(i).frase
           });
         }
       }
@@ -155,7 +155,7 @@ export class OfflineService {
   guardarPersona(data) {
     return this.storage.executeSql(`INSERT INTO personas 
     (idPersona, cedula, apellidos, nombres, 
-    correo, idLugar, seguro) VALUES (?, ?, ?, ?, ?, ?, ?)`, data)
+    correo, idLugar, frase) VALUES (?, ?, ?, ?, ?, ?, ?)`, data)
     .then(res => {
       this.getPersona();
     }).catch(err => {
@@ -163,17 +163,23 @@ export class OfflineService {
     })
   }
 
+  deletePersona() {
+    return this.storage.executeSql('DELETE FROM personas', []).then(res => {
+      this.getPersona()
+    })
+  }
+
   guardarMesas(data) {
     return this.storage.executeSql(`INSERT INTO mesas 
-    (idMesa, idLugar, sexo, numero, idPersona, electores, ctrl) VALUES 
-      (?, ?, ?, ?, ?, ?, ?)`, data)
+    (idMesa, idLugar, sexo, numero, idPersona, electores, ctrl, presidente, nacional, provincial, parlamento) VALUES 
+      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, data)
     .then(res => {
-      console.log('ok')
+      this.getMesas();
     })
   }
 
   getMesas() {
-    return this.storage.executeSql('SELECT * FROM mesas', [])
+    return this.storage.executeSql('SELECT * FROM mesas ORDER BY idMesa, sexo, numero', [])
     .then(res => {
       let items: Mesa[] = [];
       if (res.rows.length > 0) {
@@ -186,10 +192,15 @@ export class OfflineService {
             numero: res.rows.item(i).numero,
             idPersona: res.rows.item(i).idPersona,
             electores: res.rows.item(i).electores,
-            ctrl: JSON.parse(res.rows.item(i).ctrl)
+            ctrl: JSON.parse(res.rows.item(i).ctrl),
+            presidente: parseInt(res.rows.item(i).presidente),
+            nacional: parseInt(res.rows.item(i).nacional),
+            provincial: parseInt(res.rows.item(i).provincial),
+            parlamento: parseInt(res.rows.item(i).parlamento)
           });
         }
       }
+      console.log('mesas', items)
       this.mesas.next(items);
     });
   }
@@ -307,7 +318,7 @@ export class OfflineService {
     mesas.electores AS electores, mesas.ctrl AS ctrl, eleccion.idPersona AS idPersona, eleccion.takeImg AS takeImg,
     eleccion.sendData AS sendData, eleccion.sendImg 
     FROM eleccion LEFT JOIN mesas ON eleccion.idMesa = mesas.idMesa
-    WHERE eleccion.tipoEleccion = ? AND eleccion.idPersona = ?`, data).then(res => {
+    WHERE eleccion.tipoEleccion = ? AND eleccion.idPersona = ? ORDER BY idMesa, sexo, numero`, data).then(res => {
       let items = [];
       if (res.rows.length > 0) {
         
@@ -433,7 +444,7 @@ export class OfflineService {
             nombres: res.rows.item(i).nombres,
             correo: res.rows.item(i).correo,
             idLugar: res.rows.item(i).idLugar,
-            seguro: res.rows.item(i).seguro
+            frase: res.rows.item(i).seguro
           });
         }
       } else {
@@ -446,7 +457,7 @@ export class OfflineService {
           nombres: '',
           correo: '',
           idLugar: 0,
-          seguro: ''
+          frase: ''
         });
 
       }
@@ -457,8 +468,7 @@ export class OfflineService {
 
 
   buscarUsuarioMesas(idPersona) {
-   console.log('buscarUsuarios mesa')
-    return this.storage.executeSql(`SELECT idMesa, idLugar, sexo, numero, idPersona, electores, ctrl FROM mesasUsuarios WHERE idPersona = ?`, [idPersona])
+    return this.storage.executeSql(`SELECT * FROM mesasUsuarios WHERE idPersona = ? ORDER BY idMesa, sexo, numero`, [idPersona])
     .then(res => {
       let items: Mesa[] = [];
       if (res.rows.length > 0) {
@@ -470,7 +480,11 @@ export class OfflineService {
             numero: res.rows.item(i).numero,
             idPersona: res.rows.item(i).idPersona,
             electores: res.rows.item(i).electores,
-            ctrl: JSON.parse(res.rows.item(i).ctrl)
+            ctrl: JSON.parse(res.rows.item(i).ctrl),
+            presidente: parseInt(res.rows.item(i).presidente),
+            nacional: parseInt(res.rows.item(i).nacional),
+            provincial: parseInt(res.rows.item(i).provincial),
+            parlamento: parseInt(res.rows.item(i).parlamento)
           });
         }
       }

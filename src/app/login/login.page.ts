@@ -20,7 +20,8 @@ export class LoginPage implements OnInit {
     apellidos: '',
     nombres: '',
     correo: '',
-    idLugar: 0
+    idLugar: 0,
+    frase: ''
   };
   mesas: Mesa[] = [];
   data = {};
@@ -42,26 +43,31 @@ export class LoginPage implements OnInit {
   async entrar() {
     if (this.usuario !== '' && this.seguro !== '') {
       this.data = {
-        usuario: this.usuario,
-        seguro: this.seguro
+        data: {
+          usuario: this.usuario,
+          seguro: this.seguro
+        }
       }
-      //await this.db.runLogin(this.data)
-      await this.db1.buscarUsuario(this.usuario, this.seguro)
+      await this.db.runLogin(this.data)
+      //await this.db1.buscarUsuario(this.usuario, this.seguro)
       .then (async d => {
-        //this.db.fetchPersonas().subscribe(items => {
-          this.db1.fetchUsuario().subscribe(items => {
+        this.db.fetchPersonas().subscribe(items => {
+          //this.db1.fetchUsuario().subscribe(items => {
           this.persona = items[0];
           if(this.persona.idPersona > 0) {
             let datos = Object.values(this.persona)
-            //datos.push(this.seguro)
-            console.log(`persona: ${JSON.stringify(datos)}`);
             this.db1.guardarPersona(datos).then(d =>{
-              //this.db.runMesas({idPersona: this.persona.idPersona})
-              this.db1.buscarUsuarioMesas(this.persona.idPersona)
+              console.log(this.persona.frase)
+              this.db.runMesas({
+                data: {
+                  idPersona: this.persona.idPersona
+                },
+                frase: this.persona.frase,
+                seguro: this.persona.cedula
+              })
+              //this.db1.buscarUsuarioMesas(this.persona.idPersona)
               .then(async d => {
-                //await this.db.fetchMesas().subscribe(item => {
-                  console.log('llegue d')
-                  await this.db1.fetchUsuarioMesas().subscribe(items => {
+                await this.db.fetchMesas().subscribe(items => {
                   this.mesas = items;
                   console.log(this.mesas)
                   if (this.mesas.length > 0) {

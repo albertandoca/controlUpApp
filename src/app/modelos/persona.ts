@@ -7,4 +7,5 @@ export interface Persona {
     correo: string;
     idLugar: number;
     seguro?: string;
+    frase: string;
 }

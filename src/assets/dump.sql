@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS personas(
     nombres VARCHAR(50),
     correo VARCHAR(60),
     idLugar INTEGER,
-    seguro VARCHAR(50)
+    seguro VARCHAR(50),
+    frase TEXT
 );
 
 CREATE TABLE IF NOT EXISTS lugares(
@@ -24,7 +25,12 @@ CREATE TABLE IF NOT EXISTS mesas(
     numero INTEGER,
     idPersona INTEGER,
     electores INTEGER,
-    ctrl BOOLEAN
+    ctrl BOOLEAN,
+    presidente INTEGER,
+    nacional INTEGER,
+    provincial INTEGER,
+    parlamento INTEGER
+
 );
 
 CREATE TABLE IF NOT EXISTS partidos(
