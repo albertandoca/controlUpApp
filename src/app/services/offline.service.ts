@@ -392,7 +392,7 @@ export class OfflineService {
 
   getVoto(tipoEleccion, idMesa) {
     
-    return this.storage.executeSql(`SELECT  id, idPartido, idMesa, voto FROM ${tipoEleccion} 
+    return this.storage.executeSql(`SELECT * FROM ${tipoEleccion} 
     WHERE idMesa = ?`, [idMesa]).then(res => {
       let items: Voto[] = [];
       if(res.rows.length > 0) {
@@ -401,7 +401,9 @@ export class OfflineService {
             id: parseInt(res.rows.item(i).id),
             idPartido: parseInt(res.rows.item(i).idPartido),
             idMesa: parseInt(res.rows.item(i).idMesa),
-            voto: parseInt(res.rows.item(i).voto)
+            voto: parseInt(res.rows.item(i).voto),
+            idIngreso: parseInt(res.rows.item(i).idIngreso),
+            idModifica: parseInt(res.rows.item(i).idModifica)
           })
         }
       }

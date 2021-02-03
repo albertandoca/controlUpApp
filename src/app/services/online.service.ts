@@ -4,11 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Persona } from '../modelos/persona';
 import { Mesa } from '../modelos/mesa';
 import { ToastController } from '@ionic/angular';
-
-export interface DataRx {
-  data: any;
-  msg: string;
-}
+import { DataRx } from '../modelos/datarx';
 
 @Injectable({
   providedIn: 'root'
@@ -96,8 +92,8 @@ export class OnlineService {
 
   getPersonas() {
     this.http.get(`${this.urlServer}getpersonas`)
-    .subscribe(d => {
-      alert(JSON.stringify(d))
+    .subscribe(res => {
+      alert(JSON.stringify(res))
     })
   }
 

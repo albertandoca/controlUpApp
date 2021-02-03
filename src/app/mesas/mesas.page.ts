@@ -1,3 +1,4 @@
+import { OnlineService } from './../services/online.service';
 
 import { OfflineService } from './../services/offline.service';
 import { Router, ActivatedRoute, Params } from '@angular/router';
@@ -7,6 +8,8 @@ import { Subscription } from 'rxjs';
 import { Platform } from '@ionic/angular';
 import { Eleccion } from '../modelos/eleccion';
 import { ToastController } from '@ionic/angular';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { DataRx } from '../modelos/datarx';
 
 
 
@@ -18,6 +21,13 @@ import { ToastController } from '@ionic/angular';
 })
 export class MesasPage implements OnInit, AfterViewInit, OnDestroy {
 
+  urlServer = 'https://192.168.1.61:3000/app/';
+  httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type':  'application/json'//,
+      // Authorization: 'my-auth-token'
+    })
+  };
   provincia: string = '';
   distrito: string = '';
   canton: string = '';
@@ -41,6 +51,8 @@ export class MesasPage implements OnInit, AfterViewInit, OnDestroy {
   fetchLugares: Subscription;
   fetchEleccion: Subscription;
   fetchJoinMesas: Subscription;
+  fetchVotos: Subscription;
+  fetchImg: Subscription;
   plataforma: Subscription;
   tipoEleccion: string;
   eleccionEstado: Array<Eleccion>;
@@ -49,11 +61,16 @@ export class MesasPage implements OnInit, AfterViewInit, OnDestroy {
   idMesa: number;
   electores: number;
   idPersona: number;
+  urlEleccion: string;
+  urlImg: string;
+  tipoImg: string;
 
   constructor(private router:Router,
     private db1: OfflineService,
+    private db: OnlineService,
     private platform: Platform,
     public toastController: ToastController,
+    private http: HttpClient,
     private activatedRoute: ActivatedRoute) { }
 o
   ngOnInit() {
@@ -99,15 +116,27 @@ o
     if (this.tipo === 1) {
       this.tipoEleccion = 'JRV PRESIDENTE';
       this.sendTipo = 'presidentes';
+      this.urlEleccion = 'uploaddatapresidente';
+      this.tipoImg = 'imgPresidentes';
+      this.urlImg = 'uploadimgpresidente';
     } else if (this.tipo === 2) {
       this.tipoEleccion = 'JRV ASAMBLEA NACIONAL';
       this.sendTipo = 'nacionales';
+      this.urlEleccion = 'uploaddatanacional';
+      this.tipoImg = 'imgNacionales';
+      this.urlImg = 'uploadimgnacional';
     } else if (this.tipo === 3) {
       this.tipoEleccion = 'JRV ASAMBLEA PROVINCIAL';
       this.sendTipo = 'provinciales';
+      this.urlEleccion = 'uploaddataprovincial';
+      this.tipoImg = 'imgProvinciales';
+      this.urlImg = 'uploadimgprovincial';
     } else if (this.tipo === 4) {
       this.tipoEleccion = 'JRV PARLAMENTO ANDINO';
       this.sendTipo = 'parlamentos';
+      this.urlEleccion = 'uploaddataparlamento';
+      this.tipoImg = 'imgParlamentos';
+      this.urlImg = 'uploadimgparlamento';
     }
     console.log('regresa')
     this.db1.getMesas().then(async d => {
@@ -164,12 +193,113 @@ o
     this.router.navigate(['/datos', this.sendTipo, idMesa, electores]);
   }
 
-  enviarImg(idMesa, idPersona) {
-    this.db1.updateSendImg(this.sendTipo, idMesa, idPersona);
-    this.db1.updateSendData(this.sendTipo, idMesa, idPersona, 3);
-    this.mensajeGeneral('Las imágenes llegaron con éxito al servidor', 'middle', 'primary');
-    this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]);
+  generateFormImage(img, MAX_WIDTH: number = 720, MAX_HEIGHT: number = 1200, quality: number = 1, callback) {
+    let canvas: any = document.createElement('canvas');
+    let image = new Image();
 
+    image.onload = () => {
+      let width = image.width;
+      let height = image.height;
+
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width
+          width = MAX_WIDTH
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      let ctx = canvas.getContext('2d');
+
+      ctx.drawImage(image, 0, 0, width, height);
+      
+      let dataUrl = canvas.toDataURL('image/jpeg', quality)
+       callback(dataUrl)
+    };
+    image.src = img;
+  }
+
+  async convertir(img1, img2, img3, idMesa, idPersona) {
+    let imagenes = {
+      data: {
+        idMesa: idMesa,
+        urlImg1: '',
+        urlImg2: '',
+        urlImg3: '',
+      }
+    }
+    
+    await this.generateFormImage(img1, 720, 1200, 0.5, async data => {
+      let imagen = data;
+      console.log(data)
+      imagenes.data.urlImg1 = await imagen.split(',')[1];
+      await this.generateFormImage(img2, 720, 1200, 0.5, async data1 => {
+        let imagen = data1;
+        console.log(data1)
+        imagenes.data.urlImg2 = await imagen.split(',')[1];
+        await this.generateFormImage(img3, 720, 1200, 0.5, async data2 => {
+          let imagen = data2;
+          console.log(data2)
+          imagenes.data.urlImg3 = await imagen.split(',')[1];
+          this.http.put<DataRx>(`${this.urlServer}${this.urlImg}`, imagenes, this.httpOptions)
+          .subscribe(items => {
+            if(!items) {
+              this.mensajeGeneral('No se guardaron los datos, revise su conexión a internet o intentelo más tarde.', 'middle', 'danger');
+            } else {
+              this.mensajeGeneral('Las imágenes llegaron con éxito al servidor', 'middle', 'primary');
+              this.db1.updateSendImg(this.sendTipo, idMesa, idPersona);
+              this.db1.updateSendData(this.sendTipo, idMesa, idPersona, 3);
+              this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]);
+            } 
+          }, error => {
+            this.mensajeGeneral('Las imágenes no se guardaron en el servidor, por favor conpruebe su conexión a internet e intente más tarde.', 'middle', 'danger')
+          });  
+        })
+      })
+    })
+    
+  }
+
+  async enviarImg(idMesa, idPersona) {
+    let data: any;
+    this.db1.getImagenes(this.tipoImg, idMesa).then( async d => {
+      this.fetchImg = await this.db1.fetchImagenes().subscribe(items => {
+        data = items;
+      })
+      await this.convertir(data[0].urlImg1, data[0].urlImg2, data[0].urlImg3, idMesa, idPersona).then(res => {
+        console.log('ddd',res)
+      })
+      
+    })
+/*
+      let datos = {
+        data: {
+          idMesa: data[0].idMesa,
+          urlImg1: url1,
+          urlImg2: url2,
+          urlImg3: url3
+        }
+      } 
+      console.log('datosd', datos)
+      this.http.put<DataRx>(`${this.urlServer}${this.urlImg}`, datos, this.httpOptions)
+      .subscribe(items => {
+        if(!items) {
+          this.mensajeGeneral('No se guardaron los datos, revise su conexión a internet o intentelo más tarde.', 'middle', 'danger');
+        } else {
+          this.mensajeGeneral('Las imágenes llegaron con éxito al servidor', 'middle', 'primary');
+          this.db1.updateSendImg(this.sendTipo, idMesa, idPersona);
+          this.db1.updateSendData(this.sendTipo, idMesa, idPersona, 3);
+          this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]);
+        } 
+      }, error => {
+        this.mensajeGeneral('Las imágenes no se guardaron en el servidor, por favor conpruebe su conexión a internet e intente más tarde.', 'middle', 'danger')
+      });  
+    })*/
   }
 
   ngOnDestroy() {
@@ -208,11 +338,25 @@ o
           icon: 'send',
           role: 'cancel',
           handler: () => {
-            this.mensajeGeneral('Los datos llegaron con éxito al servidor', 'middle', 'primary');
-            console.log(idPersona, this.sendTipo, idMesa)
-            this.db1.updateSendData(this.sendTipo, idMesa, idPersona, 3);
-            this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]);
-
+            let data : any;
+            this.db1.getVoto(this.sendTipo, idMesa).then(d => {
+              this.fetchVotos = this.db1.fetchVotos().subscribe(items => {
+                data = { data: items };
+              }); 
+              this.http.put<DataRx>(`${this.urlServer}${this.urlEleccion}`, data, this.httpOptions)
+              .subscribe(items => {
+                if(!items) {
+                  this.mensajeGeneral('No se guardaron los datos, revise su conexión a internet o intentelo más tarde.', 'middle', 'danger');
+                } else {
+                  this.mensajeGeneral('Los datos llegaron con éxito al servidor', 'middle', 'primary');
+                  this.db1.updateSendData(this.sendTipo, idMesa, idPersona, 3);
+                  this.db1.getEleccion([this.sendTipo, this.juntas[0].idMesa]);
+                } 
+              }, error => {
+                this.mensajeGeneral('Los datos no se guardaron en el servidor, por favor conpruebe su conexión a internet e intente más tarde.', 'middle', 'danger')
+              });         
+            })
+            this.fetchVotos.unsubscribe();
           }
         }
       ]
